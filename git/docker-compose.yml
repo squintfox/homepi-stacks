@@ -1,0 +1,62 @@
+services:
+  gitea:
+    image: gitea/gitea:latest
+    networks:
+      - webproxy-backend
+    environment:
+      # static
+      - GITEA__database__HOST=gitea-db
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__oauth2__ENABLED=true
+      - GITEA__oauth2__DEFAULT_APPLICATIONS=git-credential-manager
+      - GITEA__oauth2__ACCESS_TOKEN_EXPIRATION_TIME=43200
+      - GITEA__oauth2__REFRESH_TOKEN_EXPIRATION_TIME=8760
+      - GITEA__oauth2__INVALIDATE_REFRESH_TOKENS=false
+      # configtool managed
+      - USER_UID=${HPI_APP_UID}
+      - USER_GID=${HPI_APP_GID}
+      - GITEA__database__PASSWD=${GITEA_DATABASE_PASSWORD}
+      # Portainer optional 
+      - GITEA__database__USER=${GITEA_DATABASE_USER:-gitea}
+      - GITEA__database__NAME=${GITEA_DATABASE_NAME:-gitea}
+      # Portainer managed
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/gitea/gitea:/data
+      - /etc/TZ:/etc/timezone:roac
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      caddy: git.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 3000}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    # ports:
+    #   - "3000:3000"
+    #   - "222:22"
+    deploy:
+      labels:
+        - homepage.group=Tools  
+        - homepage.name=Git
+        - homepage.icon=sh-gitea
+        - homepage.href=https://git.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        # - homepage.description=Git
+    depends_on:
+      - gitea-db
+
+  gitea-db:
+    image: postgres:17
+    environment:
+      # configtool managed
+      - POSTGRES_PASSWORD=${GITEA_DATABASE_PASSWORD}
+      # Portainer optional
+      - POSTGRES_USER=${GITEA_DATABASE_USER:-gitea}
+      - POSTGRES_DB=${GITEA_DATABASE_NAME:-gitea}
+    networks:
+      - webproxy-backend
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/gitea/postgres:/var/lib/postgresql/data
+
+networks:
+  webproxy-backend:
+    external: true
+    name: webproxy-backend

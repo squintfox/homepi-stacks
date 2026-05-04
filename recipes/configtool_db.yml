@@ -1,0 +1,31 @@
+homepi:
+  environments:
+    base:
+      - recipes.default
+
+  config:
+    recipes:
+      default:
+        hpi_recipes_db_database:
+          value: recipes
+          env:
+            - RECIPES_DB_DATABASE
+            - TF_VAR_RECIPES_DB_DATABASE
+        hpi_recipes_db_username:
+          value: hpi_recipes_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - RECIPES_DB_USERNAME
+            - TF_VAR_RECIPES_DB_USERNAME
+        hpi_recipes_db_password:
+          value: hpi_recipes_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - RECIPES_DB_PASSWORD
+            - TF_VAR_RECIPES_DB_PASSWORD
+        hpi_openai_api_key_password:
+          value: hpi_openai_api_key
+          secret_namespace: homepi_secrets.vault
+          env:
+            - OPENAI_API_KEY
+            - TF_VAR_OPENAI_API_KEY

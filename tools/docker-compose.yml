@@ -1,0 +1,80 @@
+services:
+  it-tools:
+    image: corentinth/it-tools:latest
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: it-tools.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      homepage.group: Tools  
+      homepage.name: IT Tools  
+      homepage.icon: sh-it-tools
+      homepage.href: https://it-tools.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+  stirling-pdf:
+    image: stirlingtools/stirling-pdf:latest
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/stirling-pdf/tessdata:/usr/share/tessdata  # OCR language files
+      - ${HPI_LOCAL_DATA_PATH}/stirling-pdf/configs:/configs               # Settings & database
+      - ${HPI_LOCAL_DATA_PATH}/stirling-pdf/logs:/logs      
+      - ${HPI_LOCAL_DATA_PATH}/stirling-pdf/pipeline:/pipeline             # Automation configs
+    # ports:
+    #   - "8080:8080"
+    environment:
+      PUID: ${HPI_APP_UID}
+      PGID: ${HPI_APP_GID}
+      # Application settings
+      SYSTEM_DEFAULTLOCALE: en-US
+      SYSTEM_MAXFILESIZE: "250"
+      SECURITY_ENABLELOGIN: "false"
+      # Optional: Java memory settings
+      JAVA_CUSTOM_OPTS: "-Xmx2g"
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v1/info/status || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
+    deploy:
+      labels:
+        - homepage.group=Tools  
+        - homepage.name=PDF  
+        - homepage.icon=sh-stirling-pdf
+        - homepage.href=https://pdf.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: pdf.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 8080}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      
+  excalidraw:
+    image: excalidraw/excalidraw:latest
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: draw.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        - homepage.group=Tools  
+        - homepage.name=Draw  
+        - homepage.icon=sh-excalidraw
+        - homepage.href=https://draw.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+networks:
+  webproxy-backend:
+    external: true

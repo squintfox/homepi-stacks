@@ -1,0 +1,14 @@
+homepi:
+  environments:
+    base:
+      - code.default
+
+  config:
+    code:
+      default:
+        hpi_code_server_password:
+          value: hpi_code_server
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_CODE_SERVER_PASSWORD
+            - TF_VAR_HPI_CODE_SERVER_PASSWORD

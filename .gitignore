@@ -1,0 +1,15 @@
+# Exclude local overrides
+**/docker-compose.override.yml
+**/.env
+configtool_db.user.yml
+.archive/
+
+# for python environment dev
+.venv*/
+__pycache__/
+
+# Terraform state and lock files
+**/*.tfstate
+**/*.tfstate.*
+**/.terraform.lock.hcl
+**/.terraform/

@@ -1,0 +1,24 @@
+services:
+  homepage:
+    image: gethomepage/homepage:latest
+    # ports:
+    #   - 3000:3000
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/homepage:/app/config # Make sure your local config directory exists
+    environment:
+      PUID: ${HPI_APP_UID}
+      PGID: ${HPI_APP_GID}
+      HOMEPAGE_ALLOWED_HOSTS: homepage.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT} # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: homepage.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 3000}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+
+networks:
+  webproxy-backend:
+    external: true
+    name: webproxy-backend

@@ -1,0 +1,102 @@
+services:
+  beszel:
+    image: henrygd/beszel
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/beszel/data:/beszel_data
+      - ${HPI_LOCAL_DATA_PATH}/beszel/socket:/beszel_socket
+    # ports:
+    #   - 8090:8090
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: monitoring.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 8090}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        homepage.group: Monitoring  
+        homepage.name: Monitor  
+        homepage.icon: sh-beszel
+        homepage.href: https://monitoring.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+  beszel-agent:
+    image: henrygd/beszel-agent
+    network_mode: host
+    volumes:
+      # trying to use the docker proxy didn't work completely, networking wasn't working
+      # and some metrics didn't show
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # monitor other disks / partitions by mounting a folder in /extra-filesystems
+      # - /mnt/disk1/.beszel:/extra-filesystems/disk1:ro
+      - ${HPI_LOCAL_DATA_PATH}/beszel/socket:/beszel_socket
+    environment:
+      LISTEN: /beszel_socket/beszel.sock
+      KEY: ${BESZEL_AGENT_PASSWORD}
+
+  speedtest-tracker:
+    image: linuxserver/speedtest-tracker:latest
+    # ports:
+    #   - 8080:80
+    #   - 8443:443
+    environment:
+      - PUID=${HPI_APP_UID}
+      - PGID=${HPI_APP_GID}
+      - APP_TIMEZONE=${HPI_TIME_ZONE}
+      - DISPLAY_TIMEZONE=${HPI_TIME_ZONE}
+      # VAULT
+      - DB_USERNAME=${SPEEDTEST_DB_USERNAME}
+      - DB_PASSWORD=${SPEEDTEST_DB_PASSWORD}
+      - APP_KEY=base64:${SPEEDTEST_APP_KEY}
+      - DB_CONNECTION=pgsql
+      - DB_HOST=speedtest-db
+      - DB_PORT=5432
+      - DB_DATABASE=${SPEEDTEST_DB_DATABASE}
+      - APP_URL=https://speedtest.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
+      - ASSET_URL=https://speedtest.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=relay.${HPI_DNS_DOMAIN}
+      - MAIL_PORT=25
+      - MAIL_USERNAME=null
+      - MAIL_PASSWORD=null
+      - MAIL_FROM_ADDRESS="speedtest@${HPI_DNS_DOMAIN}"
+      - MAIL_FROM_NAME="Speedtest Tracker"
+      - MAIL_SCHEME=null
+      - SPEEDTEST_SCHEDULE=6 */1 * * *
+      - SPEEDTEST_SERVERS=57682, 14236, 43201 # this one sucked, but maybe that was real?  56370
+      - SPEEDTEST_PRUNE_RESULTS_OLDER_THAN=0
+      - PUBLIC_DASHBOARD='true'
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/speedtest/config:/config
+    # - /path/to-custom-ssl-keys:/config/keys
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: speedtest.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        homepage.group: Monitoring  
+        homepage.name: Speedtest  
+        homepage.icon: sh-speedtest-tracker
+        homepage.href: https://speedtest.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+  speedtest-db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: ${SPEEDTEST_DB_DATABASE}
+      # VAULT
+      POSTGRES_USER: ${SPEEDTEST_DB_USERNAME}
+      POSTGRES_PASSWORD: ${SPEEDTEST_DB_PASSWORD}
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/speedtest/postgres_db:/var/lib/postgresql
+    networks:
+      - webproxy-backend
+
+networks:
+  webproxy-backend:
+    external: true

@@ -1,0 +1,21 @@
+homepi:
+  environments:
+    base:
+      - shepherd.default
+
+  config:
+    shepherd:
+      default:
+        # vaultwarden can have u and p for each item, postpend _username to get the username
+        hpi_shepherd_registry_username:
+          value: hpi_shepherd_registry
+          secret_namespace: homepi_secrets.vault
+          env:
+            - SHEPHERD_REGISTRY_USERNAME
+            - TF_VAR_SHEPHERD_REGISTRY_USERNAME
+        hpi_shepherd_registry_password:
+          value: hpi_shepherd_registry
+          secret_namespace: homepi_secrets.vault
+          env:
+            - SHEPHERD_REGISTRY_PASSWORD
+            - TF_VAR_SHEPHERD_REGISTRY_PASSWORD

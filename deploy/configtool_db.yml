@@ -1,0 +1,32 @@
+homepi:
+  environments:
+    base:
+      - semaphore.default
+
+  config:
+    semaphore:
+      default:
+        hpi_semaphore_db_database:
+          value: semaphore
+          env:
+            - SEMAPHORE_DB_DATABASE
+            - TF_VAR_SEMAPHORE_DB_DATABASE
+        # vaultwarden can have u and p for each item, postpend _username to get the username
+        hpi_semaphore_db_username:
+          value: hpi_semaphore_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - SEMAPHORE_DB_USERNAME
+            - TF_VAR_SEMAPHORE_DB_USERNAME
+        hpi_semaphore_db_password:
+          value: hpi_semaphore_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - SEMAPHORE_DB_PASSWORD
+            - TF_VAR_SEMAPHORE_DB_PASSWORD
+        hpi_semaphore_access_key_password:
+          value: hpi_semaphore_access_key
+          secret_namespace: homepi_secrets.vault
+          env:
+            - SEMAPHORE_ACCESS_KEY
+            - TF_VAR_SEMAPHORE_ACCESS_KEY

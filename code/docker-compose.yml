@@ -1,0 +1,49 @@
+services:
+  code-server:
+    image: lscr.io/linuxserver/code-server:latest
+    environment:
+      - PUID=${HPI_APP_UID}
+      - PGID=${HPI_APP_GID}
+      - TZ=${HPI_TIME_ZONE}
+      - PROXY_DOMAIN=code.${HPI_DNS_DOMAIN}
+      # vault
+      - PASSWORD=${HPI_CODE_SERVER_PASSWORD}
+      # - HASHED_PASSWORD=
+      # - SUDO_PASSWORD=
+      # - SUDO_PASSWORD_HASH=
+      # - DEFAULT_WORKSPACE=/config/workspace
+      # - PWA_APPNAME=code-server
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/code-server:/config
+      - ${HPI_LOCAL_DATA_PATH}:/local-data
+      - homepi_stacks:/stacks
+      - homepi_repo:/homepi
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: code.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 8443}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    # ports:
+    #   - "3000:3000"
+    #   - "222:22"
+    deploy:
+      labels:
+        - homepage.group=Tools  
+        - homepage.name=Code
+        - homepage.icon=sh-visual-studio-code
+        - homepage.href=https://code.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+networks:
+  webproxy-backend:
+    external: true
+
+volumes:
+  homepi_repo:
+    external: true
+    name: homepi_repo
+  homepi_stacks:
+    external: true
+    name: homepi_stacks

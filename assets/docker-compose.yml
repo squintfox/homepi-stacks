@@ -1,0 +1,149 @@
+services:
+  snipe-it:
+    image: snipe/snipe-it:latest
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/snipe-it/storage:/var/lib/snipeit
+      - ${HPI_LOCAL_DATA_PATH}/snipe-it/logs:/var/www/html/storage/logs
+      - ${HPI_LOCAL_DATA_PATH}/snipe-it/backups:/var/www/html/storage/app/backups
+    # ports:
+    #   - "${APP_PORT:-8000}:80"
+    depends_on:
+      - snipe-db
+    environment:
+      # VAULT
+      APP_KEY: base64:${SNIPE_APP_KEY}
+      DB_USERNAME: ${SNIPE_DB_USERNAME}
+      DB_PASSWORD: ${SNIPE_DB_PASSWORD}
+      # static
+      DB_DATABASE: ${SNIPE_DB_DATABASE}
+
+      APP_PORT: 8000
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: https://assets.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
+      APP_TIMEZONE: ${HPI_TIME_ZONE}
+      APP_LOCALE: en-US
+      MAX_RESULTS: 500
+      PRIVATE_FILESYSTEM_DISK: local
+      PUBLIC_FILESYSTEM_DISK: local_public
+      DB_CONNECTION: mysql
+      DB_HOST: snipe-db
+      DB_PORT: 3306
+      DB_PREFIX: null
+      DB_DUMP_PATH: /usr/bin
+      DB_CHARSET: utf8mb4
+      DB_COLLATION: utf8mb4_unicode_ci
+      DB_SANITIZE_BY_DEFAULT: "false"
+      DB_SSL: "false"
+      DB_SSL_IS_PAAS: "false"
+      DB_SSL_KEY_PATH: null
+      DB_SSL_CERT_PATH: null
+      DB_SSL_CA_PATH: null
+      DB_SSL_CIPHER: null
+      MAIL_MAILER: smtp
+      MAIL_HOST: relay.${HPI_DNS_DOMAIN}
+      MAIL_PORT: 25
+      MAIL_USERNAME: null
+      MAIL_PASSWORD: null
+      MAIL_TLS_VERIFY_PEER: "false"
+      MAIL_FROM_ADDR: assets@${HPI_DNS_DOMAIN}
+      MAIL_FROM_NAME: Snipe-IT
+      MAIL_REPLYTO_ADDR: assets@${HPI_DNS_DOMAIN}
+      MAIL_REPLYTO_NAME: Snipe-IT
+      MAIL_AUTO_EMBED_METHOD: attachment
+      ALLOW_BACKUP_DELETE: "false"
+      ALLOW_DATA_PURGE: "false"
+      IMAGE_LIB: gd
+      MAIL_BACKUP_NOTIFICATION_DRIVER: mail
+      MAIL_BACKUP_NOTIFICATION_ADDRESS: ${HPI_PRIMARY_EMAIL}
+      BACKUP_ENV: "true"
+      ALL_BACKUP_KEEP_DAYS: 7
+      DAILY_BACKUP_KEEP_DAYS: 16
+      WEEKLY_BACKUP_KEEP_WEEKS: 8
+      MONTHLY_BACKUP_KEEP_MONTHS: 4
+      YEARLY_BACKUP_KEEP_YEARS: 2
+      PHP_UPLOAD_LIMIT: 50
+      PHP_POST_MAX_SIZE: 50
+      PHP_UPLOAD_MAX_FILESIZE: 50
+      PHP_MEMORY_LIMIT: 50
+      SESSION_LIFETIME: 60
+      EXPIRE_ON_CLOSE: "false"
+      ENCRYPT: "false"
+      COOKIE_NAME: snipeit_session
+      COOKIE_DOMAIN: null
+      SECURE_COOKIES: "true"
+      API_TOKEN_EXPIRATION_YEARS: 40
+      API_THROTTLE_PER_MINUTE: 1000
+      BS_TABLE_STORAGE: localStorage
+      APP_TRUSTED_PROXIES: 172.16.0.0/12,10.0.0.0/8,192.168.0.0/16
+      ALLOW_IFRAMING: "false"
+      REFERRER_POLICY: same-origin
+      ENABLE_CSP: "false"
+      CORS_ALLOWED_ORIGINS: null
+      ENABLE_HSTS: "false"
+      CACHE_DRIVER: file
+      SESSION_DRIVER: file
+      QUEUE_DRIVER: sync
+      CACHE_PREFIX: snipeit
+      REDIS_HOST: redis
+      REDIS_PASSWORD: null
+      REDIS_PORT: 6379
+      MEMCACHED_HOST: null
+      MEMCACHED_PORT: null
+      PUBLIC_AWS_SECRET_ACCESS_KEY: null
+      PUBLIC_AWS_ACCESS_KEY_ID: null
+      PUBLIC_AWS_DEFAULT_REGION: null
+      PUBLIC_AWS_BUCKET: null
+      PUBLIC_AWS_URL: null
+      PUBLIC_AWS_BUCKET_ROOT: null
+      PRIVATE_AWS_ACCESS_KEY_ID: null
+      PRIVATE_AWS_SECRET_ACCESS_KEY: null
+      PRIVATE_AWS_DEFAULT_REGION: null
+      PRIVATE_AWS_BUCKET: null
+      PRIVATE_AWS_URL: null
+      PRIVATE_AWS_BUCKET_ROOT: null
+      AWS_ACCESS_KEY_ID: null
+      AWS_SECRET_ACCESS_KEY: null
+      AWS_DEFAULT_REGION: null
+      LOGIN_MAX_ATTEMPTS: 5
+      LOGIN_LOCKOUT_DURATION: 60
+      RESET_PASSWORD_LINK_EXPIRES: 900
+      LOG_CHANNEL: stderr
+      LOG_MAX_DAYS: 10
+      APP_LOCKED: "false"
+      APP_CIPHER: AES-256-CBC
+      APP_FORCE_TLS: "false"
+      GOOGLE_MAPS_API: null
+      LDAP_MEM_LIM: 500M
+      LDAP_TIME_LIM: 600
+      LOG_LEVEL: warning
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: assets.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        - homepage.group=Home  
+        - homepage.name=Assets
+        - homepage.icon=sh-snipe-it
+        - homepage.href=https://assets.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+  snipe-db:
+    image: mariadb:latest
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/snipe-it/mysql_db:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: ${SNIPE_DB_DATABASE}
+      MYSQL_USER: ${SNIPE_DB_USERNAME}
+      MYSQL_PASSWORD: ${SNIPE_DB_PASSWORD}
+      # MYSQL_ROOT_PASSWORD: 
+    networks:
+      - webproxy-backend
+
+networks:
+  webproxy-backend:
+    external: true

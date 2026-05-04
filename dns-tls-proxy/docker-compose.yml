@@ -1,0 +1,96 @@
+services:
+  # for DNS-over-TLS
+  proxy:
+    image: nginx:latest
+    ports:
+      - ${DNS_TLS_PORT:-853}:853/tcp
+    environment:
+      - DNS_UPSTREAM_HOST=${DNS_UPSTREAM_HOST:-technitium}
+      - DNS_UPSTREAM_PORT=${DNS_UPSTREAM_PORT:-53}
+      - DNS_TLS_PORT=${DNS_TLS_PORT:-853}
+      - DNS_TLS_CERT=/etc/nginx/conf.d/ssl/certs/nginx.crt
+      - DNS_TLS_KEY=/etc/nginx/conf.d/ssl/certs/nginx.key
+    networks:
+      - webproxy-backend
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/dns-tls-proxy/certs:/etc/nginx/conf.d/ssl/certs:ro
+    command: |
+      /bin/sh -ec '
+      cat >/etc/nginx/nginx.conf <<EOF
+      user  nginx;
+      worker_processes  auto;
+      worker_rlimit_nofile  15000;
+      pid  /var/run/nginx.pid;
+      include /usr/share/nginx/modules/*.conf;
+
+      events {
+          worker_connections  2048;
+          multi_accept on;
+          use epoll;
+      }
+
+      stream {
+          upstream dns {
+              zone dns 64k;
+              server $${DNS_UPSTREAM_HOST}:$${DNS_UPSTREAM_PORT};
+          }
+
+          server {
+              listen $${DNS_TLS_PORT} ssl;
+              ssl_certificate $${DNS_TLS_CERT};
+              ssl_certificate_key $${DNS_TLS_KEY};
+              proxy_pass dns;
+
+              ssl_protocols TLSv1.3;
+              ssl_prefer_server_ciphers on;
+              ssl_ciphers ECDH+AESGCM:ECDH+CHACHA20:ECDH+AES256:ECDH+AES128:!aNULL:!SHA1:!AESCCM;
+              ssl_conf_command Options PrioritizeChaCha;
+              ssl_conf_command Ciphersuites TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256;
+              ssl_ecdh_curve secp384r1;
+              ssl_session_timeout 10m;
+              ssl_session_cache shared:SSL:10m;
+              ssl_session_tickets off;
+          }
+      }
+      EOF
+      exec nginx -g "daemon off;"
+      '
+
+  acme-desec:
+    image: neilpang/acme.sh:latest
+    depends_on:
+      - proxy
+    environment:
+      - DEDYN_TOKEN=${HPI_DESEC_TOKEN}
+      - LE_EMAIL=${HPI_PRIMARY_EMAIL}
+      - LE_DOMAIN=dns.${HPI_DNS_DOMAIN}
+      - LE_DNS_SLEEP=120
+      - DOCKER_HOST=tcp://dockerproxy:2375
+    networks:
+      - webproxy-backend
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/dns-tls-proxy/acme:/acme.sh
+      - ${HPI_LOCAL_DATA_PATH}/dns-tls-proxy/certs:/certs
+    entrypoint: /bin/sh
+    command: |
+      -c '
+      set -eu
+      acme.sh --set-default-ca --server letsencrypt
+      acme.sh --register-account -m "$${LE_EMAIL}" || true
+      if [ ! -f /certs/nginx.crt ] || [ ! -f /certs/nginx.key ]; then
+        acme.sh --issue --dns dns_desec -d "$${LE_DOMAIN}" --dnssleep "$${LE_DNS_SLEEP}" --keylength ec-256
+        acme.sh --install-cert -d "$${LE_DOMAIN}" --ecc --fullchain-file /certs/nginx.crt --key-file /certs/nginx.key --reloadcmd "docker kill -s HUP proxy"
+      fi
+      while :; do
+        acme.sh --cron --home /acme.sh
+        sleep 12h
+      done
+      '
+    # cert issuance gets messed up when using the internal resolver
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+
+networks:
+  webproxy-backend:
+    external: true

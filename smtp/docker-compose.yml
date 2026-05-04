@@ -1,0 +1,12 @@
+services:
+  smtp:
+    image: ixdotai/smtp:latest
+    environment:
+      # - GMAIL_USER=youraddress@gmail.com
+      # - GMAIL_PASSWORD=your_app_password
+      - RELAY_NETWORKS=:172.16.0.0/12:192.168.0.0/24:10.0.0.0/16
+      # - MAILNAME=relay.local
+    ports:
+      - "2525:25"
+    labels:
+      com.centurylinklabs.watchtower.enable: true

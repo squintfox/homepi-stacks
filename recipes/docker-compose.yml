@@ -1,0 +1,72 @@
+services:
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/mealie/data:/app/data
+    depends_on:
+      - mealie-db
+    environment:
+      # VAULT
+      SECRET_KEY: ${RECIPES_SECRET_KEY}
+      POSTGRES_USER: ${RECIPES_DB_USERNAME}
+      POSTGRES_PASSWORD: ${RECIPES_DB_PASSWORD}
+      # configtool
+      PUID: ${HPI_APP_UID}
+      PGID: ${HPI_APP_GID}
+      POSTGRES_DB: ${RECIPES_DB_DATABASE}
+      TZ: ${HPI_TIME_ZONE}
+      BASE_URL: https://recipes.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+      # static
+      DB_ENGINE: postgres
+      POSTGRES_SERVER: mealie-db
+      POSTGRES_PORT: 5432
+      SMTP_HOST: relay.${HPI_DNS_DOMAIN}
+      SMTP_PORT: 25
+      SMTP_FROM_NAME: Recipes
+      SMTP_FROM_EMAIL: recipes@${HPI_DNS_DOMAIN}
+      SMTP_USERNAME: ''
+      SMTP_PASSWORD: ''
+      SMTP_AUTH_STRATEGY: none
+      OPENAI_BASE_URL: null
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ALLOW_SIGNUP: "true"
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: recipes.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 9000}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        homepage.group: Home 
+        homepage.name: Recipes
+        homepage.icon: sh-mealie
+        homepage.href: https://recipes.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+      resources:
+        limits:
+          memory: 1000M
+
+  mealie-db:
+    image: postgres:18
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/mealie/postgres_db:/var/lib/postgresql
+    environment:
+      # VAULT
+      POSTGRES_USER: ${RECIPES_DB_USERNAME}
+      PGUSER: ${RECIPES_DB_USERNAME}
+      POSTGRES_PASSWORD: ${RECIPES_DB_PASSWORD}
+      # static
+      POSTGRES_DB: ${RECIPES_DB_DATABASE}
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 30s
+      timeout: 20s
+      retries: 3  
+    networks:
+      - webproxy-backend
+
+networks:
+  webproxy-backend:
+    external: true

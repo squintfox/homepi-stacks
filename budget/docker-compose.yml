@@ -1,0 +1,90 @@
+services:
+  actual:
+    image: actualbudget/actual-server:latest
+    # ports:
+    #   - '5006:5006'
+    environment:
+      - ACTUAL_TOKEN_EXPIRATION=1800
+      # - ACTUAL_HTTPS_KEY=/data/selfhost.key
+      # - ACTUAL_HTTPS_CERT=/data/selfhost.crt
+      # - ACTUAL_PORT=5006
+      # - ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB=20
+      # - ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB=50
+      # - ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB=20
+      # # See all options and more details at https://actualbudget.org/docs/config/
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/actual-budget:/data
+    healthcheck:
+      # Enable health check for the instance
+      test: ['CMD-SHELL', 'node src/scripts/health-check.js']
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: budget.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 5006}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        homepage.group: Finance  
+        homepage.name: Budget
+        homepage.icon: sh-actual-budget
+        homepage.href: https://budget.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        # - homepage.description=
+
+  api:
+    image: jhonderson/actual-http-api:latest
+    environment:
+      - PORT=5007
+      # - ACTUAL_DATA_DIR=./data
+      - ACTUAL_SERVER_URL=https://budget.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+      - ACTUAL_SERVER_PASSWORD=${ACTUAL_BUDGET_PASSWORD}
+      - API_KEY=${ACTUAL_API_PASSWORD}
+    networks:
+      - webproxy-backend
+    depends_on:
+      - actual
+    labels:
+      caddy: budget-api.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 5007}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        - homepage.group=Finance  
+        - homepage.name=Actual API
+        - homepage.icon=sh-swagger
+        - homepage.href=https://budget-api.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/api-docs/
+
+  auto_sync:
+    image: seriouslag/actual-auto-sync:latest
+    depends_on:
+      - actual
+    environment:
+      - ACTUAL_SERVER_URL=https://budget.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+      - ACTUAL_SERVER_PASSWORD=${ACTUAL_BUDGET_PASSWORD}
+      # Sync every day at 5:00, 14:00, 15:00 and 18:00
+      - CRON_SCHEDULE=0 5,14,15,18 * * *
+      - LOG_LEVEL=info
+      - ACTUAL_BUDGET_SYNC_IDS=${ACTUAL_BUDGET_SYNC_ID}
+      # Optional environment variables for encryption (if enabled in the app settings)
+      # - ENCRYPTION_PASSWORDS=password1
+      - TIMEZONE=${HPI_TIME_ZONE}
+      - RUN_ON_START=true
+    networks:
+      - webproxy-backend
+      # this works, but the software is out of date vs actual 26.4.0, i need to wait for the update
+    deploy:
+      replicas: 0
+      restart_policy:
+        condition: none
+
+networks:
+  webproxy-backend:
+    external: true

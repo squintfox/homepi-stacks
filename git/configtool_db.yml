@@ -1,0 +1,21 @@
+homepi:
+  environments:
+    base:
+      - git.default
+
+  config:
+    git:
+      default:
+        # vaultwarden can have u and p for each item, postpend _username to get the username
+        hpi_gitea_db_username:
+          value: hpi_gitea_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - GITEA_DATABASE_USERNAME
+            - TF_VAR_GITEA_DATABASE_USERNAME
+        hpi_gitea_db_password:
+          value: hpi_gitea_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - GITEA_DATABASE_PASSWORD
+            - TF_VAR_GITEA_DATABASE_PASSWORD

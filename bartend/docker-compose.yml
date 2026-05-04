@@ -1,0 +1,104 @@
+services:
+  db_recipes:
+    image: postgres:17
+    volumes:
+      - /volume1/Rob/Docker/foodanddrink/recipes_db:/var/lib/postgresql/data
+    env_file:
+      - .env
+    # restart: unless-stopped
+    networks:
+      - webproxy-backend
+    
+  web_recipes:
+    image: vabene1111/recipes
+    env_file:
+      - .env
+    # ports:
+    #   - 80:80
+    volumes:
+      - staticfiles:/opt/recipes/staticfiles
+      - /volume1/Rob/Docker/foodanddrink/recipes/mediafiles:/opt/recipes/mediafiles
+    depends_on:
+      - db_recipes
+    # restart: unless-stopped
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: 'recipes.stuffthatsfine.com'
+      caddy.reverse_proxy: '{{upstreams 80}}'
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: WSqWZwnAx2nVsKvvxQK91YLhK837
+
+  # bar-meilisearch:
+  #   image: getmeili/meilisearch:v1.15 # Never use latest tag
+  #   environment:
+  #     - MEILI_NO_ANALYTICS=true
+  #     - MEILI_MASTER_KEY=kAfvL4u^VrK9ehfY
+  #     - MEILI_ENV=production
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /volume1/Rob/Docker/foodanddrink/meilisearch_data:/meili_data
+  #   networks:
+  #     - webproxy-backend
+  #   # ports:
+  #   #   - "8081:7700"
+  #   labels:
+  #     caddy: 'bar-search.stuffthatsfine.com'
+  #     caddy.reverse_proxy: '{{upstreams 7700}}'
+
+  # # Optional, but recommended
+  # bar-redis:
+  #   image: redis
+  #   environment:
+  #     - ALLOW_EMPTY_PASSWORD=yes
+  #   networks:
+  #     - webproxy-backend
+
+  # bar-assistant:
+  #   image: barassistant/server:v5
+  #   depends_on:
+  #     - bar-meilisearch
+  #     - bar-redis # Remove if not using redis
+  #   environment:
+  #     - APP_URL=https://bar-api.stuffthatsfine.com:444
+  #     - MEILISEARCH_KEY=kAfvL4u^VrK9ehfY
+  #     - MEILISEARCH_HOST=https://bar-search.stuffthatsfine.com:444
+  #     - REDIS_HOST=bar-redis # Remove if not using redis
+  #     - CACHE_DRIVER=redis # Change to "file" if not using redis
+  #     - SESSION_DRIVER=redis # Change to "file" if not using redis
+  #     - ALLOW_REGISTRATION=true
+  #   # ports:
+  #   #   - "8082:8080"
+  #   networks:
+  #     - webproxy-backend
+  #   labels:
+  #     caddy: 'bar.stuffthatsfine.com'
+  #     caddy.reverse_proxy: '{{upstreams 8080}}'
+  #   volumes:
+  #     - /volume1/Rob/Docker/foodanddrink/bar_data:/var/www/cocktails/storage/bar-assistant
+
+  # bar-salt-rim:
+  #   image: barassistant/salt-rim:v4
+  #   depends_on:
+  #     - bar-assistant
+  #   environment:
+  #     - API_URL=https://bar-api.stuffthatsfine.com:444
+  #     - MEILISEARCH_URL=https://bar-search.stuffthatsfine.com:444
+  #   # ports:
+  #   #   - "8080:8080"
+  #   networks:
+  #     - webproxy-backend
+  #   labels:
+  #     caddy: 'bar.stuffthatsfine.com'
+  #     caddy.reverse_proxy: '{{upstreams 8080}}'
+
+volumes:
+  staticfiles:
+
+networks:
+  webproxy-backend:
+    external: true
+
+
+  

@@ -1,0 +1,74 @@
+services:
+  semaphore-db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${SEMAPHORE_DB_DATABASE}
+      POSTGRES_USER: ${SEMAPHORE_DB_USERNAME}
+      POSTGRES_PASSWORD: ${SEMAPHORE_DB_PASSWORD}
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/semaphore/postgres_db:/var/lib/postgresql/data
+    networks:
+      - webproxy-backend
+
+  semaphore:
+    image: semaphoreui/semaphore:latest
+    environment:
+      SEMAPHORE_DB_DIALECT: postgres
+      SEMAPHORE_DB_HOST: semaphore-db
+      SEMAPHORE_DB_NAME: ${SEMAPHORE_DB_DATABASE}
+      SEMAPHORE_DB_USER: ${SEMAPHORE_DB_USERNAME}
+      SEMAPHORE_DB_PASS: ${SEMAPHORE_DB_PASSWORD}
+      SEMAPHORE_ACCESS_KEY_ENCRYPTION: ${SEMAPHORE_ACCESS_KEY}
+      SEMAPHORE_ADMIN: admin
+      SEMAPHORE_ADMIN_PASSWORD: changeme
+      SEMAPHORE_ADMIN_NAME: Admin
+      SEMAPHORE_ADMIN_EMAIL: ${HPI_PRIMARY_EMAIL}
+      SEMAPHORE_EMAIL_ALERT: 'true'
+      SEMAPHORE_EMAIL_SENDER: deploy@${HPI_DNS_DOMAIN}
+      SEMAPHORE_EMAIL_HOST: relay.${HPI_DNS_DOMAIN}
+      SEMAPHORE_EMAIL_PORT: 25
+      SEMAPHORE_EMAIL_USERNAME: ''
+      SEMAPHORE_EMAIL_PASSWORD: ''
+      SEMAPHORE_EMAIL_SECURE: 'false'
+      SEMAPHORE_WEB_ROOT: https://deploy.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
+      TZ: ${HPI_TIME_ZONE}
+    # ports:
+    #   - 3000:3000
+    configs:
+      - source: semaphore_requirements
+        target: /etc/semaphore/requirements.txt
+    volumes:
+      - type: volume
+        source: local_nfs
+        target: /mnt/nfsshare
+        volume:
+          nocopy: true
+    depends_on:
+      - semaphore-db
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: deploy.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 3000}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        homepage.group: Management  
+        homepage.name: Deploy  
+        homepage.icon: sh-semaphore-ui
+        homepage.href: https://deploy.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+networks:
+  webproxy-backend:
+    external: true
+
+configs:
+  semaphore_requirements:
+    file: ./files/requirements.txt
+
+volumes:
+  local_nfs:
+    external: true
+    name: local_nfs

@@ -1,0 +1,6 @@
+services:
+  smtp:
+    environment:
+      - GMAIL_USER=<gmail_address>
+      - GMAIL_PASSWORD=<gmail_app_pass>
+      - MAILNAME=relay.replacethisdomain.com

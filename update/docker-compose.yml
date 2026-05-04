@@ -1,0 +1,28 @@
+services:
+  shepherd:
+    image: containrrr/shepherd
+    environment:
+      TZ: ${HPI_TIME_ZONE}
+      # VAULT
+      REGISTRY_USER: ${SHEPHERD_REGISTRY_USERNAME}
+      REGISTRY_PASSWORD: ${SHEPHERD_REGISTRY_PASSWORD}
+      VERBOSE: 'true'
+      # TODO: this doesn't seem to work via label
+      # IGNORELIST_SERVICES: 'homepi-critical_caddy homepi-command_command'
+      FILTER_SERVICES: ''
+      RUN_ONCE_AND_EXIT: 'true'
+      IMAGE_AUTOCLEAN_LIMIT: 2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      replicas: 0
+      restart_policy:
+        condition: none
+      labels:
+        - swarm.cronjob.enable=true
+        # Start service every day at 5 AM
+        - swarm.cronjob.schedule=0 5 * * *
+        - swarm.cronjob.skip-running=true
+      placement:
+        constraints:
+          - node.role == manager

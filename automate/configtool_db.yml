@@ -1,0 +1,26 @@
+homepi:
+  environments:
+    base:
+      - homeassistant.default
+
+  config:
+    homeassistant:
+      default:
+        hpi_homeassistant_db_database:
+          value: hassdb
+          env:
+            - HOMEASSISTANT_DB_DATABASE
+            - TF_VAR_HOMEASSISTANT_DB_DATABASE
+        # vaultwarden can have u and p for each item, postpend _username to get the username
+        hpi_homeassistant_db_username:
+          value: hpi_homeassistant_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HOMEASSISTANT_DB_USERNAME
+            - TF_VAR_HOMEASSISTANT_DB_USERNAME
+        hpi_homeassistant_db_password:
+          value: hpi_homeassistant_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HOMEASSISTANT_DB_PASSWORD
+            - TF_VAR_HOMEASSISTANT_DB_PASSWORD

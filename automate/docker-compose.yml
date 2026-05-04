@@ -1,0 +1,58 @@
+services:
+  hass-db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${HOMEASSISTANT_DB_DATABASE}
+      # VAULT
+      POSTGRES_USER: ${HOMEASSISTANT_DB_USERNAME}
+      POSTGRES_PASSWORD: ${HOMEASSISTANT_DB_PASSWORD}
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/homeassistant/postgres_db:/var/lib/postgresql/data
+    networks:
+      - webproxy-backend
+
+  homeassistant:
+    image: homeassistant/home-assistant:stable
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/homeassistant/config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    privileged: true
+    environment:
+      HASS_DB_HOST: hass-db
+      HASS_DB_DATABASE: ${HOMEASSISTANT_DB_DATABASE}
+      # VAULT
+      HASS_DB_USERNAME: ${HOMEASSISTANT_DB_USERNAME}
+      HASS_DB_PASSWORD: ${HOMEASSISTANT_DB_PASSWORD}
+    networks:
+      - webproxy-backend
+    depends_on:
+      - hass-db
+    labels:
+      caddy: automate.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 8123}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        homepage.group: Home  
+        homepage.name: Automate  
+        homepage.icon: sh-home-assistant
+        homepage.href: https://automate.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+  mosquitto:
+    image: eclipse-mosquitto
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/homeassistant/mosquitto/config:/mosquitto/config:rw
+      - ${HPI_LOCAL_DATA_PATH}/homeassistant/mosquitto/data:/mosquitto/data:rw
+      - ${HPI_LOCAL_DATA_PATH}/homeassistant/mosquitto/log:/mosquitto/log:rw
+    ports:
+      - 1883:1883
+      - 9001:9001
+    networks:
+      - webproxy-backend
+
+networks:
+  webproxy-backend:
+    external: true

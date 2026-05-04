@@ -1,0 +1,31 @@
+homepi:
+  environments:
+    base:
+      - snipe-it.default
+
+  config:
+    snipe-it:
+      default:
+        hpi_snipe_app_key_password:
+          value: hpi_snipe_app_key
+          secret_namespace: homepi_secrets.vault
+          env:
+            - SNIPE_APP_KEY
+            - TF_VAR_SNIPE_APP_KEY
+        hpi_snipe_db_database:
+          value: snipeit
+          env:
+            - SNIPE_DB_DATABASE
+            - TF_VAR_SNIPE_DB_DATABASE
+        hpi_snipe_db_username:
+          value: hpi_snipe_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - SNIPE_DB_USERNAME
+            - TF_VAR_SNIPE_DB_USERNAME
+        hpi_snipe_db_password:
+          value: hpi_snipe_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - SNIPE_DB_PASSWORD
+            - TF_VAR_SNIPE_DB_PASSWORD

@@ -1,0 +1,27 @@
+homepi:
+  environments:
+    base:
+      - actual.default
+
+  config:
+    actual:
+      default:
+        # we're using an otherwise unused username for the file sync id
+        hpi_actual_budget_username:
+          value: hpi_actual_budget
+          secret_namespace: homepi_secrets.vault
+          env:
+            - ACTUAL_BUDGET_SYNC_ID
+            - TF_VAR_ACTUAL_BUDGET_SYNC_ID
+        hpi_actual_budget_password:
+          value: hpi_actual_budget
+          secret_namespace: homepi_secrets.vault
+          env:
+            - ACTUAL_BUDGET_PASSWORD
+            - TF_VAR_ACTUAL_BUDGET_PASSWORD
+        hpi_actual_api_password:
+          value: hpi_actual_api
+          secret_namespace: homepi_secrets.vault
+          env:
+            - ACTUAL_API_PASSWORD
+            - TF_VAR_ACTUAL_API_PASSWORD

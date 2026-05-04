@@ -1,0 +1,78 @@
+services:
+  acme-sh:
+    image: neilpang/acme.sh:latest
+    environment:
+      - DEDYN_TOKEN=${HPI_DESEC_TOKEN}
+      - LE_EMAIL=${HPI_PRIMARY_EMAIL}
+      - LE_DNS_SLEEP=120
+      - LE_RENEW_SKIP_RC=2
+      - DOCKER_HOST=tcp://dockerproxy:2375
+    networks:
+      - webproxy-backend
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/acme.sh/acme:/acme.sh
+      - ${HPI_LOCAL_DATA_PATH}/acme.sh/certs:/certs
+    configs:
+      - source: certificates_acme_domain_list
+        target: /run/config/certificates_acme_domain_list
+        mode: 0444
+    entrypoint: /bin/sh
+    command: |
+      -c '
+      set -eu
+      DOMAIN_LIST_FILE="/run/config/certificates_acme_domain_list"
+      acme.sh --set-default-ca --server letsencrypt
+      acme.sh --register-account -m "$${LE_EMAIL}" || true
+      [ -f "$${DOMAIN_LIST_FILE}" ]
+
+      while IFS= read -r domain || [ -n "$${domain}" ]; do
+        # Skip empty lines and comments.
+        case "$${domain}" in
+          ""|\#*) continue ;;
+        esac
+
+        cert_dir="/certs/$${domain}"
+        cert_file="$${cert_dir}/cert.crt"
+        key_file="$${cert_dir}/cert.key"
+        mkdir -p "$${cert_dir}"
+
+        if [ ! -f "$${cert_file}" ] || [ ! -f "$${key_file}" ]; then
+          acme.sh --issue --dns dns_desec -d "$${domain}" --dnssleep "$${LE_DNS_SLEEP}" --keylength ec-256
+        else
+          set +e
+          acme.sh --renew -d "$${domain}" --ecc --dnssleep "$${LE_DNS_SLEEP}"
+          renew_rc=$$?
+          set -e
+          if [ "$${renew_rc}" -ne 0 ] && [ "$${renew_rc}" -ne "$${LE_RENEW_SKIP_RC}" ]; then
+            echo "Renew failed for $${domain} with exit code $${renew_rc}" >&2
+            exit "$${renew_rc}"
+          fi
+        fi
+
+        acme.sh --install-cert -d "$${domain}" --ecc --fullchain-file "$${cert_file}" --key-file "$${key_file}"
+      done < "$${DOMAIN_LIST_FILE}"
+      '
+    # cert issuance gets messed up when using the internal resolver
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    deploy:
+      replicas: 0
+      restart_policy:
+        condition: none
+      labels:
+        - swarm.cronjob.enable=true
+        # Start service every day at 3 AM
+        - swarm.cronjob.schedule=0 3 * * *
+        - swarm.cronjob.skip-running=true
+      placement:
+        constraints:
+          - node.role == manager
+
+networks:
+  webproxy-backend:
+    external: true
+
+configs:
+  certificates_acme_domain_list:
+    external: true

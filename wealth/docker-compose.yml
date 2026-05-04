@@ -1,0 +1,34 @@
+services:
+  wealthfolio:
+    image: afadil/wealthfolio:latest
+    # ports:
+    #   - '8088:8088'
+    environment:
+      - WF_LISTEN_ADDR=0.0.0.0:8088
+      - WF_DB_PATH=/data/wealthfolio.db
+      - WF_SECRET_KEY=${WEALTHFOLIO_SECRET_KEY}
+      - WF_CORS_ALLOW_ORIGINS=https://wealth.${HPI_DNS_DOMAIN}
+      - WF_REQUEST_TIMEOUT_MS=30000
+      - WF_STATIC_DIR=dist
+      - WF_AUTH_PASSWORD_HASH=${WEALTHFOLIO_PASSWORD_HASH}
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/wealthfolio:/data
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: wealth.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 8088}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        homepage.group: Finance  
+        homepage.name: Wealth
+        homepage.icon: sh-wealthfolio
+        homepage.href: https://wealth.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        # - homepage.description=
+
+networks:
+  webproxy-backend:
+    external: true

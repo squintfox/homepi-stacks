@@ -1,0 +1,20 @@
+homepi:
+  environments:
+    base:
+      - wealthfolio.default
+
+  config:
+    wealthfolio:
+      default:
+        hpi_wealthfolio_password:
+          value: hpi_wealthfolio
+          secret_namespace: homepi_secrets.vault
+          env:
+            - WEALTHFOLIO_PASSWORD_HASH
+            - TF_VAR_WEALTHFOLIO_PASSWORD_HASH
+        hpi_wealthfolio_secret_key_password:
+          value: hpi_wealthfolio_secret_key
+          secret_namespace: homepi_secrets.vault
+          env:
+            - WEALTHFOLIO_SECRET_KEY
+            - TF_VAR_WEALTHFOLIO_SECRET_KEY

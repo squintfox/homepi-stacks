@@ -1,0 +1,40 @@
+homepi:
+  environments:
+    base:
+      - speedtest.default
+      - beszel.default
+
+  config:
+    speedtest:
+      default:
+        hpi_speedtest_app_key_password:
+          value: hpi_speedtest_app_key
+          secret_namespace: homepi_secrets.vault
+          env:
+            - SPEEDTEST_APP_KEY
+            - TF_VAR_SPEEDTEST_APP_KEY
+        hpi_speedtest_db_database:
+          value: speedtest
+          env:
+            - SPEEDTEST_DB_DATABASE
+            - TF_VAR_SPEEDTEST_DB_DATABASE
+        hpi_speedtest_db_username:
+          value: hpi_speedtest_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - SPEEDTEST_DB_USERNAME
+            - TF_VAR_SPEEDTEST_DB_USERNAME
+        hpi_speedtest_db_password:
+          value: hpi_speedtest_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - SPEEDTEST_DB_PASSWORD
+            - TF_VAR_SPEEDTEST_DB_PASSWORD
+    beszel:
+      default:
+        hpi_beszel_agent_password:
+          value: hpi_beszel_agent
+          secret_namespace: homepi_secrets.vault
+          env:
+            - BESZEL_AGENT_PASSWORD
+            - TF_VAR_BESZEL_AGENT_PASSWORD
