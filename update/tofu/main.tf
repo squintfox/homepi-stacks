@@ -25,7 +25,7 @@ resource "portainer_stack" "update" {
   force_update    = false
 
   repository_url            = var.HPI_STACKS_REPO_URL
-  repository_reference_name = "refs/heads/main"
+  repository_reference_name = "refs/heads/release"
   file_path_in_repository   = "update/docker-compose.yml"
 
   git_repository_authentication = false

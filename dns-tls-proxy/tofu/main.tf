@@ -25,7 +25,7 @@ resource "portainer_stack" "dns-tls-proxy" {
   endpoint_id     = data.portainer_environment.swarm.id
 
   repository_url            = var.HPI_STACKS_REPO_URL
-  repository_reference_name = "refs/heads/main"
+  repository_reference_name = "refs/heads/release"
   # EDIT: 
   file_path_in_repository   = "dns-tls-proxy/docker-compose.yml"
 

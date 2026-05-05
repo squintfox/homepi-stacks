@@ -23,7 +23,7 @@ resource "portainer_stack" "homepage" {
   endpoint_id     = data.portainer_environment.swarm.id
 
   repository_url            = var.HPI_STACKS_REPO_URL
-  repository_reference_name = "refs/heads/main"
+  repository_reference_name = "refs/heads/release"
   file_path_in_repository   = "homepage/docker-compose.yml"
 
   git_repository_authentication = false
