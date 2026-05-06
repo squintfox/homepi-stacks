@@ -8,7 +8,8 @@ services:
     environment:
       PUID: ${HPI_APP_UID}
       PGID: ${HPI_APP_GID}
-      HOMEPAGE_ALLOWED_HOSTS: homepage.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT} # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+      # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+      HOMEPAGE_ALLOWED_HOSTS: homepage.${HPI_DNS_DOMAIN},homepage.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT} 
     networks:
       - webproxy-backend
     labels:
