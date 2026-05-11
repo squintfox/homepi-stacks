@@ -36,3 +36,4 @@ services:
          directory mask = 0777
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/samba:/shares
+      - ${HPI_LOCAL_DATA_PATH}/plex/media:/plex/media
