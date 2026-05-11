@@ -24,7 +24,7 @@ services:
       SAMBA_CONF_LOG_LEVEL: 1
       AVAHI_DISABLE: 1
       SAMBA_VOLUME_CONFIG_public: |
-        [Public]
+        [Shares]
          path = /shares
          guest ok = yes
          guest only = yes
