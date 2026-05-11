@@ -19,9 +19,10 @@ services:
          directory mask = 0777
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/samba:/shares
-    labels:
-      homepage.group: Home  
-      homepage.name: File Server 
-      homepage.icon: sh-file-explorer
-      homepage.href: smb://file-server.${HPI_DNS_DOMAIN}/
+    deploy:
+      labels:
+        homepage.group: Home  
+        homepage.name: File Server 
+        homepage.icon: sh-file-explorer
+        homepage.href: smb://file-server.${HPI_DNS_DOMAIN}/
       
