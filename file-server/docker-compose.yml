@@ -1,9 +1,25 @@
 services:
   samba:
     image: ghcr.io/servercontainers/samba
-    network_mode: host
     cap_add:
       - CAP_NET_ADMIN
+    ports:
+      - target: 445
+        published: 445
+        protocol: tcp
+        mode: host
+      - target: 139
+        published: 139
+        protocol: tcp
+        mode: host
+      - target: 137
+        published: 137
+        protocol: udp
+        mode: host
+      - target: 138
+        published: 138
+        protocol: udp
+        mode: host
     environment:
       SAMBA_CONF_LOG_LEVEL: 1
       AVAHI_DISABLE: 1
@@ -19,10 +35,3 @@ services:
          directory mask = 0777
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/samba:/shares
-    deploy:
-      labels:
-        homepage.group: Home  
-        homepage.name: File Server 
-        homepage.icon: sh-file-explorer
-        homepage.href: smb://file-server.${HPI_DNS_DOMAIN}/
-      
