@@ -25,15 +25,13 @@ services:
       AVAHI_DISABLE: 1
       SAMBA_VOLUME_CONFIG_public: |
         [Shares]
-         path = /shares
+         path = /homepi
          guest ok = yes
          guest only = yes
          read only = no
          browseable = yes
-         follow symlinks = yes
          force user = root
          create mask = 0666
          directory mask = 0777
     volumes:
-      - ${HPI_LOCAL_DATA_PATH}/samba:/shares
-      - ${HPI_LOCAL_DATA_PATH}/plex/media:/plex/media
+      - ${HPI_LOCAL_DATA_PATH}:/homepi
