@@ -1,0 +1,27 @@
+services:
+  samba:
+    image: ghcr.io/servercontainers/samba
+    network_mode: host
+    cap_add:
+      - CAP_NET_ADMIN
+    environment:
+      SAMBA_CONF_LOG_LEVEL: 1
+      AVAHI_DISABLE: 1
+      SAMBA_VOLUME_CONFIG_public: |
+        [Public]
+         path = /shares
+         guest ok = yes
+         guest only = yes
+         read only = no
+         browseable = yes
+         force user = root
+         create mask = 0666
+         directory mask = 0777
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/samba:/shares
+    labels:
+      homepage.group: Home  
+      homepage.name: File Server 
+      homepage.icon: sh-file-explorer
+      homepage.href: smb://file-server.${HPI_DNS_DOMAIN}/
+      

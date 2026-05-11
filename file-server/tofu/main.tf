@@ -19,7 +19,7 @@ data "portainer_environment" "swarm" {
 # EDIT: 
 resource "portainer_stack" "tools" {
   # EDIT: 
-  name            = "tools"
+  name            = "file-server"
   deployment_type = "swarm"
   method          = "repository"
   endpoint_id     = data.portainer_environment.swarm.id
@@ -27,7 +27,7 @@ resource "portainer_stack" "tools" {
   repository_url            = var.HPI_STACKS_REPO_URL
   repository_reference_name = "refs/heads/release"
   # EDIT: 
-  file_path_in_repository   = "tools/docker-compose.yml"
+  file_path_in_repository   = "file-server/docker-compose.yml"
 
   git_repository_authentication = false
   prune                         = true
@@ -46,19 +46,6 @@ resource "portainer_stack" "tools" {
   }
 
   # /required
-
-  env {
-    name  = "HPI_DESEC_TOKEN"
-    value = var.HPI_DESEC_TOKEN
-  }
-  env {
-    name  = "HPI_APP_UID"
-    value = var.HPI_APP_UID
-  }
-  env {
-    name  = "HPI_APP_GID"
-    value = var.HPI_APP_GID
-  }
 
   lifecycle {
     ignore_changes = [repository_reference_name]
