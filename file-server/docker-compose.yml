@@ -30,6 +30,7 @@ services:
          guest only = yes
          read only = no
          browseable = yes
+         follow symlinks = yes
          force user = root
          create mask = 0666
          directory mask = 0777
