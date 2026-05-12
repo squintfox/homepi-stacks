@@ -17,7 +17,9 @@ services:
     deploy:
       replicas: 0
       restart_policy:
-        condition: none
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
       labels:
         - swarm.cronjob.enable=true
         # Start service every day at 5 AM

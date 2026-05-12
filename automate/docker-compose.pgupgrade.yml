@@ -1,0 +1,30 @@
+services:
+  # hass-db:
+  #   image: postgres:17
+  #   environment:
+  #     POSTGRES_DB: ${HOMEASSISTANT_DB_DATABASE}
+  #     # VAULT
+  #     POSTGRES_USER: ${HOMEASSISTANT_DB_USERNAME}
+  #     POSTGRES_PASSWORD: ${HOMEASSISTANT_DB_PASSWORD}
+  #   volumes:
+  #     - ${HPI_LOCAL_DATA_PATH}/homeassistant/postgres_db:/var/lib/postgresql/data
+  #   networks:
+  #     - webproxy-backend
+
+  hass-pgupgrade:
+    image: pgautoupgrade/pgautoupgrade:latest
+    environment:
+      PGAUTO_ONESHOT: 'yes'
+      POSTGRES_PASSWORD: ${HOMEASSISTANT_DB_PASSWORD}
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/homeassistant/postgres_db:/var/lib/postgresql/data
+    networks:
+      - webproxy-backend
+    deploy:
+      replicas: 0
+      restart_policy:
+        condition: none
+
+networks:
+  webproxy-backend:
+    external: true

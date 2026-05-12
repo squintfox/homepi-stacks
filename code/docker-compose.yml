@@ -9,9 +9,9 @@ services:
       # vault
       - PASSWORD=${HPI_CODE_SERVER_PASSWORD}
       # - HASHED_PASSWORD=
-      # - SUDO_PASSWORD=
+      - SUDO_PASSWORD=${HPI_CODE_SERVER_PASSWORD}
       # - SUDO_PASSWORD_HASH=
-      # - DEFAULT_WORKSPACE=/config/workspace
+      - DEFAULT_WORKSPACE=/homepi
       # - PWA_APPNAME=code-server
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/code-server:/config

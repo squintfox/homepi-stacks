@@ -1,13 +1,13 @@
 services:
   hass-db:
-    image: postgres:17
+    image: postgres:18
     environment:
       POSTGRES_DB: ${HOMEASSISTANT_DB_DATABASE}
       # VAULT
       POSTGRES_USER: ${HOMEASSISTANT_DB_USERNAME}
       POSTGRES_PASSWORD: ${HOMEASSISTANT_DB_PASSWORD}
     volumes:
-      - ${HPI_LOCAL_DATA_PATH}/homeassistant/postgres_db:/var/lib/postgresql/data
+      - ${HPI_LOCAL_DATA_PATH}/homeassistant/postgres_db:/var/lib/postgresql
     networks:
       - webproxy-backend
 

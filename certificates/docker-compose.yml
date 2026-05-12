@@ -51,6 +51,11 @@ services:
 
         acme.sh --install-cert -d "$${domain}" --ecc --fullchain-file "$${cert_file}" --key-file "$${key_file}"
       done < "$${DOMAIN_LIST_FILE}"
+
+      chmod 755 /certs
+      find /certs -type d -exec chmod 755 {} \;
+      
+      chmod -R a+r /certs
       '
     # cert issuance gets messed up when using the internal resolver
     dns:
