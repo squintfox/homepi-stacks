@@ -1,0 +1,29 @@
+services:
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    # ports:
+    #   - 13378:80
+    user: "${HPI_APP_UID}:${HPI_APP_GID}"
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/audiobookshelf/config:/config
+      - ${HPI_LOCAL_DATA_PATH}/audiobookshelf/metadata:/metadata
+      - ${HPI_LOCAL_DATA_PATH}/audiobookshelf/audiobooks:/audiobooks
+      - ${HPI_LOCAL_DATA_PATH}/audiobookshelf/podcasts:/podcasts
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: listen.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        - homepage.group=Home  
+        - homepage.name=Listen  
+        - homepage.icon=sh-audiobookshelf
+        - homepage.href=https://listen.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+networks:
+  webproxy-backend:
+    external: true
