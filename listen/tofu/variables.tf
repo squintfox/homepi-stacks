@@ -21,9 +21,3 @@ variable "HPI_LOCAL_DATA_PATH" {
 variable "HPI_DESEC_TOKEN" {
   type        = string
 }
-variable "HPI_APP_UID" {
-  type        = string
-}
-variable "HPI_APP_GID" {
-  type        = string
-}

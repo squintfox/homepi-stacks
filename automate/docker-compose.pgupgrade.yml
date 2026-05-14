@@ -15,9 +15,10 @@ services:
     image: pgautoupgrade/pgautoupgrade:latest
     environment:
       PGAUTO_ONESHOT: 'yes'
+      POSTGRES_USER: ${HOMEASSISTANT_DB_USERNAME}
       POSTGRES_PASSWORD: ${HOMEASSISTANT_DB_PASSWORD}
     volumes:
-      - ${HPI_LOCAL_DATA_PATH}/homeassistant/postgres_db:/var/lib/postgresql/data
+      - ${HPI_LOCAL_DATA_PATH}/homeassistant/postgres_db:/var/lib/postgresql
     networks:
       - webproxy-backend
     deploy:

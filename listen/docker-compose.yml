@@ -3,7 +3,6 @@ services:
     image: ghcr.io/advplyr/audiobookshelf:latest
     # ports:
     #   - 13378:80
-    user: "${HPI_APP_UID}:${HPI_APP_GID}"
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/audiobookshelf/config:/config
       - ${HPI_LOCAL_DATA_PATH}/audiobookshelf/metadata:/metadata

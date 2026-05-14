@@ -51,14 +51,6 @@ resource "portainer_stack" "listen" {
     name  = "HPI_DESEC_TOKEN"
     value = var.HPI_DESEC_TOKEN
   }
-  env {
-    name  = "HPI_APP_UID"
-    value = var.HPI_APP_UID
-  }
-  env {
-    name  = "HPI_APP_GID"
-    value = var.HPI_APP_GID
-  }
 
   lifecycle {
     ignore_changes = [repository_reference_name]

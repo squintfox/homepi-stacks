@@ -1,12 +1,12 @@
 services:
   semaphore-db:
-    image: postgres:17
+    image: postgres:18
     environment:
       POSTGRES_DB: ${SEMAPHORE_DB_DATABASE}
       POSTGRES_USER: ${SEMAPHORE_DB_USERNAME}
       POSTGRES_PASSWORD: ${SEMAPHORE_DB_PASSWORD}
     volumes:
-      - ${HPI_LOCAL_DATA_PATH}/semaphore/postgres_db:/var/lib/postgresql/data
+      - ${HPI_LOCAL_DATA_PATH}/semaphore/postgres_db:/var/lib/postgresql
     networks:
       - webproxy-backend
 

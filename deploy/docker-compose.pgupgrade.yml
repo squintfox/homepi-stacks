@@ -14,9 +14,10 @@ services:
     image: pgautoupgrade/pgautoupgrade:latest
     environment:
       PGAUTO_ONESHOT: 'yes'
+      POSTGRES_USER: ${SEMAPHORE_DB_USERNAME}
       POSTGRES_PASSWORD: ${SEMAPHORE_DB_PASSWORD}
     volumes:
-      - ${HPI_LOCAL_DATA_PATH}/semaphore/postgres_db:/var/lib/postgresql/data
+      - ${HPI_LOCAL_DATA_PATH}/semaphore/postgres_db:/var/lib/postgresql
     networks:
       - webproxy-backend
     deploy:
