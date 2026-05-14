@@ -44,7 +44,7 @@ services:
       - gitea-db
 
   gitea-db:
-    image: postgres:17
+    image: postgres:18
     environment:
       # configtool managed
       - POSTGRES_PASSWORD=${GITEA_DATABASE_PASSWORD}
@@ -54,9 +54,8 @@ services:
     networks:
       - webproxy-backend
     volumes:
-      - ${HPI_LOCAL_DATA_PATH}/gitea/postgres:/var/lib/postgresql/data
+      - ${HPI_LOCAL_DATA_PATH}/gitea/postgres_db:/var/lib/postgresql
 
 networks:
   webproxy-backend:
     external: true
-    name: webproxy-backend
