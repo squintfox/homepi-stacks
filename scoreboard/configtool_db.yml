@@ -1,0 +1,8 @@
+homepi:
+  environments:
+    base:
+      - scoreboard.default
+
+  config:
+    scoreboard:
+      default:

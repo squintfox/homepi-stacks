@@ -1,0 +1,26 @@
+services:
+  scoreboard:
+    build: .
+    user: "${HPI_APP_UID:-1000}:${HPI_APP_GID:-1000}"
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/scoreboard:/app/data
+    environment:
+      SCOREBOARD_DB_PATH: /app/data/scoreboard.db
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: scoreboard.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 8000}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        homepage.group: Games
+        homepage.name: Scoreboard
+        homepage.icon: sh-scoreboard-ocr
+        homepage.href: https://scoreboard.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+networks:
+  webproxy-backend:
+    external: true

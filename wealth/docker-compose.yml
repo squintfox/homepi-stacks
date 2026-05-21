@@ -1,6 +1,6 @@
 services:
   wealthfolio:
-    image: afadil/wealthfolio:latest
+    image: wealthfolio/wealthfolio:latest
     # ports:
     #   - '8088:8088'
     environment:

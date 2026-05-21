@@ -1,0 +1,1 @@
+"""Scoreboard app package."""

@@ -25,6 +25,7 @@ services:
     labels:
       caddy: plex.${HPI_DNS_DOMAIN}:32400
       caddy.reverse_proxy: "{{upstreams 32400}}"
+      caddy.reverse_proxy.flush_interval: -1
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}

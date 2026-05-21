@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title }}</title>
+    <style>
+      :root {
+        --bg: #101b18;
+        --panel: #1d2f2a;
+        --panel-soft: #29423b;
+        --ink: #f2fff9;
+        --muted: #b7d2c8;
+        --accent: #f5c242;
+        --accent-ink: #2d1b00;
+        --danger: #ef6461;
+        --ring: rgba(245, 194, 66, 0.28);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(1200px 500px at 0% 0%, #26453d 0%, transparent 60%),
+          radial-gradient(900px 400px at 100% 100%, #3a2c12 0%, transparent 58%),
+          var(--bg);
+      }
+
+      .wrap {
+        width: min(920px, 94vw);
+        margin: 1.25rem auto 2.5rem;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.65rem, 3vw, 2.35rem);
+        letter-spacing: 0.03em;
+      }
+
+      .sub {
+        margin-top: 0.35rem;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .panel {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: linear-gradient(160deg, var(--panel), var(--panel-soft));
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 0.75rem;
+      }
+
+      .field {
+        width: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.22);
+        color: var(--ink);
+        font-size: 1rem;
+        padding: 0.65rem 0.8rem;
+        outline: none;
+      }
+
+      .field:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px var(--ring);
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 0.65rem 0.95rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 120ms ease, filter 120ms ease;
+      }
+
+      .btn:active {
+        transform: scale(0.98);
+      }
+
+      .btn-main {
+        background: var(--accent);
+        color: var(--accent-ink);
+      }
+
+      .btn-danger {
+        background: var(--danger);
+        color: white;
+      }
+
+      .toolbar {
+        margin-top: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .players {
+        margin-top: 1rem;
+        display: grid;
+        gap: 0.7rem;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto auto;
+        gap: 0.65rem;
+        align-items: center;
+        padding: 0.7rem;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.24);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .name {
+        min-width: 0;
+      }
+
+      .title {
+        display: block;
+        font-size: 1.08rem;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .meta {
+        margin-top: 0.15rem;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .score {
+        width: 6rem;
+        text-align: center;
+      }
+
+      .mini {
+        width: 2.5rem;
+        text-align: center;
+        font-size: 1.2rem;
+        padding: 0.4rem;
+      }
+
+      .empty {
+        margin: 1rem 0;
+        text-align: center;
+        color: var(--muted);
+      }
+
+      .status {
+        min-height: 1.25rem;
+        margin-top: 0.5rem;
+        color: #ffd9d8;
+      }
+
+      @media (max-width: 720px) {
+        .controls {
+          grid-template-columns: 1fr;
+        }
+
+        .toolbar {
+          align-items: stretch;
+        }
+
+        .toolbar > * {
+          width: 100%;
+        }
+
+        .row {
+          grid-template-columns: 1fr auto auto;
+          grid-template-areas:
+            "name name name"
+            "minus score plus";
+        }
+
+        .name {
+          grid-area: name;
+        }
+
+        .minus {
+          grid-area: minus;
+        }
+
+        .score {
+          grid-area: score;
+          width: 100%;
+        }
+
+        .plus {
+          grid-area: plus;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>Digital Scoreboard</h1>
+      <div class="sub">Add players, update scores, and sort by turn order or score.</div>
+
+      <section class="panel">
+        <form id="addPlayerForm" class="controls">
+          <input id="playerName" class="field" maxlength="40" placeholder="Player name" required />
+          <button class="btn btn-main" type="submit">Add Player</button>
+          <button id="resetBtn" class="btn btn-danger" type="button">Reset Scores</button>
+        </form>
+
+        <div class="toolbar">
+          <label>
+            Sort by
+            <select id="sortMode" class="field">
+              <option value="turn">Turn order</option>
+              <option value="score">Score</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+        <div id="players" class="players"></div>
+        <div id="empty" class="empty">No players yet.</div>
+      </section>
+    </main>
+
+    <template id="playerTemplate">
+      <article class="row">
+        <div class="name">
+          <span class="title"></span>
+          <div class="meta"></div>
+        </div>
+        <button class="btn mini minus" type="button">-</button>
+        <input class="field score" type="number" inputmode="numeric" />
+        <button class="btn mini btn-main plus" type="button">+</button>
+      </article>
+    </template>
+
+    <script>
+      const playersEl = document.getElementById("players");
+      const emptyEl = document.getElementById("empty");
+      const statusEl = document.getElementById("status");
+      const addPlayerForm = document.getElementById("addPlayerForm");
+      const playerNameInput = document.getElementById("playerName");
+      const resetBtn = document.getElementById("resetBtn");
+      const sortModeSelect = document.getElementById("sortMode");
+      const playerTemplate = document.getElementById("playerTemplate");
+
+      let state = { players: [], sort_mode: "turn" };
+
+      function setStatus(message) {
+        statusEl.textContent = message || "";
+      }
+
+      async function api(path, options = {}) {
+        const response = await fetch(path, {
+          headers: { "Content-Type": "application/json" },
+          ...options,
+        });
+
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          throw new Error(payload.detail || "Request failed.");
+        }
+
+        return response.json();
+      }
+
+      function render() {
+        playersEl.innerHTML = "";
+        const players = state.players || [];
+        emptyEl.style.display = players.length ? "none" : "block";
+
+        for (const player of players) {
+          const node = playerTemplate.content.firstElementChild.cloneNode(true);
+          node.querySelector(".title").textContent = player.name;
+          node.querySelector(".meta").textContent = `Turn ${player.turn_order}`;
+
+          const scoreInput = node.querySelector(".score");
+          scoreInput.value = player.score;
+
+          node.querySelector(".minus").addEventListener("click", async () => {
+            await updatePlayerScore(player.id, Number(scoreInput.value || 0) - 1);
+          });
+
+          node.querySelector(".plus").addEventListener("click", async () => {
+            await updatePlayerScore(player.id, Number(scoreInput.value || 0) + 1);
+          });
+
+          scoreInput.addEventListener("change", async () => {
+            await updatePlayerScore(player.id, Number(scoreInput.value || 0));
+          });
+
+          playersEl.appendChild(node);
+        }
+      }
+
+      async function refreshState() {
+        state = await api("/api/state");
+        sortModeSelect.value = state.sort_mode;
+        render();
+      }
+
+      async function updatePlayerScore(playerId, score) {
+        try {
+          state = await api(`/api/players/${playerId}/score`, {
+            method: "PUT",
+            body: JSON.stringify({ score }),
+          });
+          setStatus("");
+          render();
+        } catch (error) {
+          setStatus(error.message);
+        }
+      }
+
+      addPlayerForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        try {
+          state = await api("/api/players", {
+            method: "POST",
+            body: JSON.stringify({ name: playerNameInput.value }),
+          });
+          playerNameInput.value = "";
+          setStatus("");
+          render();
+        } catch (error) {
+          setStatus(error.message);
+        }
+      });
+
+      resetBtn.addEventListener("click", async () => {
+        try {
+          state = await api("/api/reset", { method: "POST" });
+          setStatus("Scores reset for a new game.");
+          render();
+        } catch (error) {
+          setStatus(error.message);
+        }
+      });
+
+      sortModeSelect.addEventListener("change", async () => {
+        try {
+          state = await api("/api/sort-mode", {
+            method: "PUT",
+            body: JSON.stringify({ sort_mode: sortModeSelect.value }),
+          });
+          setStatus("");
+          render();
+        } catch (error) {
+          setStatus(error.message);
+        }
+      });
+
+      refreshState().catch((error) => setStatus(error.message));
+      setInterval(() => refreshState().catch(() => {}), 2500);
+    </script>
+  </body>
+</html>
