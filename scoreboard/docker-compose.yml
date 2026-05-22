@@ -1,6 +1,6 @@
 services:
   scoreboard:
-    build: .
+    image: registry.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/scoreboard:latest
     user: "${HPI_APP_UID:-1000}:${HPI_APP_GID:-1000}"
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/scoreboard:/app/data
