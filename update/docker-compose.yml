@@ -22,8 +22,8 @@ services:
         max_attempts: 2
       labels:
         - swarm.cronjob.enable=true
-        # Start service every day at 5 AM
-        - swarm.cronjob.schedule=0 5 * * *
+        # Start service every Friday at 5 AM
+        - swarm.cronjob.schedule=0 5 * * 5
         - swarm.cronjob.skip-running=true
       placement:
         constraints:

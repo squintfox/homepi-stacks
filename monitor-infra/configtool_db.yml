@@ -1,0 +1,25 @@
+homepi:
+  environments:
+    base:
+      - infra-monitor.default
+
+  config:
+    infra-monitor:
+      default:
+        hpi_zabbix_db_database:
+          value: zabbix-db
+          env:
+            - ZABBIX_DB_DATABASE
+            - TF_VAR_ZABBIX_DB_DATABASE
+        hpi_zabbix_db_username:
+          value: hpi_zabbix_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - ZABBIX_DB_USERNAME
+            - TF_VAR_ZABBIX_DB_USERNAME
+        hpi_zabbix_db_password:
+          value: hpi_zabbix_db
+          secret_namespace: homepi_secrets.vault
+          env:
+            - ZABBIX_DB_PASSWORD
+            - TF_VAR_ZABBIX_DB_PASSWORD

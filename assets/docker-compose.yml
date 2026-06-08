@@ -7,8 +7,6 @@ services:
       - ${HPI_LOCAL_DATA_PATH}/snipe-it/backups:/var/www/html/storage/app/backups
     # ports:
     #   - "${APP_PORT:-8000}:80"
-    depends_on:
-      - snipe-db
     environment:
       # VAULT
       APP_KEY: base64:${SNIPE_APP_KEY}

@@ -5,6 +5,26 @@ terraform {
       version = "~> 1.0"
     }
   }
+
+  encryption {
+    key_provider "pbkdf2" "tfstate" {
+      passphrase = var.HPI_TFSTATE_PASSPHRASE
+    }
+
+    method "aes_gcm" "tfstate" {
+      keys = key_provider.pbkdf2.tfstate
+    }
+
+    method "unencrypted" "migrate" {}
+
+    state {
+      method = method.aes_gcm.tfstate
+
+      fallback {
+        method = method.unencrypted.migrate
+      }
+    }
+  }
 }
 
 provider "portainer" {

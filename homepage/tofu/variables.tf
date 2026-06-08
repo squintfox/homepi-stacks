@@ -19,6 +19,10 @@ variable "HPI_STACKS_REPO_URL" {
 variable "HPI_LOCAL_DATA_PATH" {
   type        = string
 }
+variable "HPI_TFSTATE_PASSPHRASE" {
+  type        = string
+  sensitive   = true
+}
 
 variable "HPI_DESEC_TOKEN" {
   type        = string

@@ -26,8 +26,6 @@ services:
       HASS_DB_PASSWORD: ${HOMEASSISTANT_DB_PASSWORD}
     networks:
       - webproxy-backend
-    depends_on:
-      - hass-db
     labels:
       caddy: automate.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 8123}}"

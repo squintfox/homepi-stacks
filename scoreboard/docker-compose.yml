@@ -18,8 +18,8 @@ services:
       labels:
         homepage.group: Games
         homepage.name: Scoreboard
-        homepage.icon: sh-scoreboard-ocr
         homepage.href: https://scoreboard.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        homepage.icon: https://scoreboard.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/static/favicon.svg
 
 networks:
   webproxy-backend:

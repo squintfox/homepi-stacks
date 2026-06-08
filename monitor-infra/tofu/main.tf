@@ -36,15 +36,18 @@ data "portainer_environment" "swarm" {
   name = "local-swarm"
 }
 
-resource "portainer_stack" "homepage" {
-  name            = "homepage"
+# EDIT: 
+resource "portainer_stack" "infra-monitor" {
+  # EDIT: 
+  name            = "infra-monitor"
   deployment_type = "swarm"
   method          = "repository"
   endpoint_id     = data.portainer_environment.swarm.id
 
   repository_url            = var.HPI_STACKS_REPO_URL
   repository_reference_name = "refs/heads/release"
-  file_path_in_repository   = "homepage/docker-compose.yml"
+  # EDIT: 
+  file_path_in_repository   = "infra-monitor/docker-compose.yml"
 
   git_repository_authentication = false
   prune                         = true
@@ -61,19 +64,30 @@ resource "portainer_stack" "homepage" {
     name  = "HPI_HTTPS_PORT"
     value = var.HPI_HTTPS_PORT
   }
+
+  # /required
+
   env {
     name  = "HPI_DESEC_TOKEN"
     value = var.HPI_DESEC_TOKEN
   }
   env {
-    name  = "HPI_APP_UID"
-    value = var.HPI_APP_UID
+    name  = "HPI_TIME_ZONE"
+    value = var.HPI_TIME_ZONE
   }
   env {
-    name  = "HPI_APP_GID"
-    value = var.HPI_APP_GID
+    name  = "ZABBIX_DB_DATABASE"
+    value = var.ZABBIX_DB_DATABASE
   }
-
+  env {
+    name  = "ZABBIX_DB_USERNAME"
+    value = var.ZABBIX_DB_USERNAME
+  }
+  env {
+    name  = "ZABBIX_DB_PASSWORD"
+    value = var.ZABBIX_DB_PASSWORD
+  }
+  
   lifecycle {
     ignore_changes = [repository_reference_name]
   }

@@ -18,8 +18,6 @@ services:
     volumes:
       - staticfiles:/opt/recipes/staticfiles
       - /volume1/Rob/Docker/foodanddrink/recipes/mediafiles:/opt/recipes/mediafiles
-    depends_on:
-      - db_recipes
     # restart: unless-stopped
     networks:
       - webproxy-backend
@@ -57,9 +55,6 @@ services:
 
   # bar-assistant:
   #   image: barassistant/server:v5
-  #   depends_on:
-  #     - bar-meilisearch
-  #     - bar-redis # Remove if not using redis
   #   environment:
   #     - APP_URL=https://bar-api.stuffthatsfine.com:444
   #     - MEILISEARCH_KEY=kAfvL4u^VrK9ehfY
@@ -80,8 +75,6 @@ services:
 
   # bar-salt-rim:
   #   image: barassistant/salt-rim:v4
-  #   depends_on:
-  #     - bar-assistant
   #   environment:
   #     - API_URL=https://bar-api.stuffthatsfine.com:444
   #     - MEILISEARCH_URL=https://bar-search.stuffthatsfine.com:444

@@ -43,8 +43,6 @@ services:
         target: /mnt/nfsshare
         volume:
           nocopy: true
-    depends_on:
-      - semaphore-db
     networks:
       - webproxy-backend
     labels:

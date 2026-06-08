@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ title }}</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
     <style>
       :root {
         --bg: #101b18;
@@ -15,6 +16,8 @@
         --accent-ink: #2d1b00;
         --danger: #ef6461;
         --ring: rgba(245, 194, 66, 0.28);
+        --drag-col-width: 2.6rem;
+        --score-col-width: 6.2rem;
       }
 
       * {
@@ -37,16 +40,40 @@
         margin: 1.25rem auto 2.5rem;
       }
 
-      h1 {
+      .header-title {
+        width: 100%;
         margin: 0;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--ink);
+        padding: 0.2rem 0.35rem;
         font-size: clamp(1.65rem, 3vw, 2.35rem);
+        font-weight: 700;
         letter-spacing: 0.03em;
       }
 
-      .sub {
-        margin-top: 0.35rem;
+      .header-title:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px var(--ring);
+        outline: none;
+      }
+
+      .title-row {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+      }
+
+      .version {
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(0, 0, 0, 0.24);
         color: var(--muted);
-        font-size: 0.95rem;
+        font-size: 0.78rem;
+        line-height: 1;
+        padding: 0.34rem 0.58rem;
       }
 
       .panel {
@@ -59,7 +86,7 @@
 
       .controls {
         display: grid;
-        grid-template-columns: 1fr auto auto;
+        grid-template-columns: 1fr auto auto auto;
         gap: 0.75rem;
       }
 
@@ -77,6 +104,32 @@
       .field:focus {
         border-color: var(--accent);
         box-shadow: 0 0 0 4px var(--ring);
+      }
+
+      select.field {
+        background: #132420;
+        color: var(--ink);
+      }
+
+      select.field option {
+        background: #132420;
+        color: var(--ink);
+      }
+
+      select.field option:checked {
+        background: var(--accent);
+        color: var(--accent-ink);
+      }
+
+      input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
       }
 
       .btn {
@@ -103,6 +156,16 @@
         color: white;
       }
 
+      .btn-reset {
+        background: #2f8f63;
+        color: #f2fff9;
+      }
+
+      .controls .btn {
+        font-size: 1.15rem;
+        line-height: 1;
+      }
+
       .toolbar {
         margin-top: 0.75rem;
         display: flex;
@@ -118,9 +181,36 @@
         gap: 0.7rem;
       }
 
-      .row {
+      .players-header {
+        margin-top: 0.8rem;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto auto auto;
+        grid-template-columns: var(--drag-col-width) minmax(0, 1fr) var(--score-col-width) var(--score-col-width) auto auto;
+        gap: 0.65rem;
+        align-items: center;
+        padding: 0 0.7rem;
+        color: var(--muted);
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .players-header .score-label {
+        justify-self: center;
+      }
+
+      .players-header .points-label {
+        justify-self: center;
+      }
+
+      .header-placeholder {
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .row {
+        position: relative;
+        display: grid;
+        grid-template-columns: var(--drag-col-width) minmax(0, 1fr) var(--score-col-width) var(--score-col-width) auto auto;
         gap: 0.65rem;
         align-items: center;
         padding: 0.7rem;
@@ -129,35 +219,111 @@
         border: 1px solid rgba(255, 255, 255, 0.08);
       }
 
+      .row.dragging {
+        opacity: 0.5;
+      }
+
+      .row.drop-before {
+        border-top: 4px solid var(--accent);
+        box-shadow: 0 -2px 10px rgba(245, 194, 66, 0.6);
+      }
+
+      .row.drop-after {
+        border-bottom: 4px solid var(--accent);
+        box-shadow: 0 2px 10px rgba(245, 194, 66, 0.6);
+      }
+
+      .row.drop-before::before,
+      .row.drop-after::after {
+        content: "";
+        position: absolute;
+        left: 0.55rem;
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 2px rgba(16, 27, 24, 0.9), 0 0 10px rgba(245, 194, 66, 0.85);
+      }
+
+      .row.drop-before::before {
+        top: -0.42rem;
+      }
+
+      .row.drop-after::after {
+        bottom: -0.42rem;
+      }
+
+      .drag-handle {
+        width: var(--drag-col-width);
+        font-size: 1.05rem;
+        line-height: 1;
+        padding: 0.4rem 0.3rem;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--ink);
+        cursor: grab;
+      }
+
+      .drag-handle:active {
+        cursor: grabbing;
+      }
+
       .name {
         min-width: 0;
       }
 
       .title {
         display: block;
+        width: 100%;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--ink);
+        padding: 0.2rem 0.35rem;
         font-size: 1.08rem;
         font-weight: 700;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+      }
+
+      .title:focus {
+        border-color: var(--accent);
+        background: rgba(0, 0, 0, 0.2);
+        box-shadow: 0 0 0 3px var(--ring);
+        outline: none;
       }
 
       .meta {
         margin-top: 0.15rem;
+        margin-left: 0.35rem;
         color: var(--muted);
         font-size: 0.82rem;
       }
 
       .score {
-        width: 6rem;
+        width: var(--score-col-width);
         text-align: center;
       }
 
-      .mini {
-        width: 2.5rem;
+      .add-score {
+        width: var(--score-col-width);
         text-align: center;
-        font-size: 1.2rem;
-        padding: 0.4rem;
+      }
+
+      .add-btn {
+        white-space: nowrap;
+        font-size: 1.1rem;
+        line-height: 1;
+      }
+
+      .delete-btn {
+        background: var(--danger);
+        color: white;
+        white-space: nowrap;
+        font-size: 1.1rem;
+        line-height: 1;
+      }
+
+      .drag-disabled .drag-handle {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       .empty {
@@ -172,9 +338,28 @@
         color: #ffd9d8;
       }
 
+      .status.success {
+        color: #9ef0c7;
+      }
+
       @media (max-width: 720px) {
+        :root {
+          --drag-col-width: 2rem;
+          --score-col-width: 4.2rem;
+        }
+
         .controls {
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr) 2rem 2rem 2rem;
+          gap: 0.4rem;
+          align-items: center;
+        }
+
+        .controls .btn {
+          width: 2rem;
+          min-width: 2rem;
+          padding: 0.35rem 0;
+          font-size: 0.95rem;
+          line-height: 1;
         }
 
         .toolbar {
@@ -185,47 +370,80 @@
           width: 100%;
         }
 
+        .players-header {
+          display: grid;
+          gap: 0.2rem;
+          padding: 0 0.2rem;
+          font-size: 0.62rem;
+        }
+
         .row {
-          grid-template-columns: 1fr auto auto;
-          grid-template-areas:
-            "name name name"
-            "minus score plus";
+          gap: 0.2rem;
+          padding: 0.45rem 0.2rem;
+          grid-template-columns: var(--drag-col-width) minmax(0, 1fr) var(--score-col-width) var(--score-col-width) 2rem 2rem;
         }
 
-        .name {
-          grid-area: name;
-        }
-
-        .minus {
-          grid-area: minus;
+        .drag-handle {
+          width: var(--drag-col-width);
+          padding: 0.3rem 0;
+          font-size: 0.95rem;
         }
 
         .score {
-          grid-area: score;
           width: 100%;
+          min-width: 0;
         }
 
-        .plus {
-          grid-area: plus;
+        .add-score {
+          width: 100%;
+          min-width: 0;
+        }
+
+        .add-btn,
+        .delete-btn {
+          width: 2rem;
+          min-width: 2rem;
+          min-width: 0;
+          padding: 0.35rem 0;
+          font-size: 0;
+          line-height: 1;
+        }
+
+        .add-btn::before,
+        .delete-btn::before {
+          display: inline-block;
+          font-size: 0.9rem;
+          line-height: 1;
+        }
+
+        .add-btn::before {
+          content: "＋";
+        }
+
+        .delete-btn::before {
+          content: "🗑";
         }
       }
     </style>
   </head>
   <body>
     <main class="wrap">
-      <h1>Digital Scoreboard</h1>
-      <div class="sub">Add players, update scores, and sort by turn order or score.</div>
+      <div class="title-row">
+        <input id="headerTitle" class="header-title" type="text" maxlength="80" />
+        <span class="version">v{{ version }}</span>
+      </div>
 
       <section class="panel">
         <form id="addPlayerForm" class="controls">
           <input id="playerName" class="field" maxlength="40" placeholder="Player name" required />
-          <button class="btn btn-main" type="submit">Add Player</button>
-          <button id="resetBtn" class="btn btn-danger" type="button">Reset Scores</button>
+          <button class="btn btn-main" type="submit" aria-label="Add Player" title="Add Player">＋</button>
+          <button id="resetBtn" class="btn btn-reset" type="button" aria-label="Reset Scores" title="Reset Scores">↺</button>
+          <button id="deleteAllBtn" class="btn btn-danger" type="button" aria-label="Delete All Players" title="Delete All Players">🗑</button>
         </form>
 
         <div class="toolbar">
           <label>
-            Sort by
+            Display by
             <select id="sortMode" class="field">
               <option value="turn">Turn order</option>
               <option value="score">Score</option>
@@ -234,6 +452,16 @@
         </div>
 
         <div id="status" class="status" role="status" aria-live="polite"></div>
+        <div id="playersHeader" class="players-header" aria-hidden="true">
+          <button class="btn drag-handle header-placeholder" type="button" tabindex="-1" aria-hidden="true">&#9776;</button>
+          <div class="name header-placeholder">
+            <input class="title" type="text" value="Player" tabindex="-1" aria-hidden="true" />
+          </div>
+          <span class="score-label">Score</span>
+          <span class="points-label">Points (+/-)</span>
+          <button class="btn btn-main add-btn header-placeholder" type="button" tabindex="-1" aria-hidden="true">＋</button>
+          <button class="btn delete-btn header-placeholder" type="button" tabindex="-1" aria-hidden="true">🗑</button>
+        </div>
         <div id="players" class="players"></div>
         <div id="empty" class="empty">No players yet.</div>
       </section>
@@ -241,30 +469,100 @@
 
     <template id="playerTemplate">
       <article class="row">
+        <button class="btn drag-handle" type="button" title="Reorder turn">&#9776;</button>
         <div class="name">
-          <span class="title"></span>
+          <input class="title" type="text" maxlength="40" />
           <div class="meta"></div>
         </div>
-        <button class="btn mini minus" type="button">-</button>
         <input class="field score" type="number" inputmode="numeric" />
-        <button class="btn mini btn-main plus" type="button">+</button>
+        <input class="field add-score" type="number" inputmode="numeric" />
+        <button class="btn btn-main add-btn" type="button" aria-label="Add Points" title="Add Points">＋</button>
+        <button class="btn delete-btn" type="button" aria-label="Delete Player" title="Delete Player">🗑</button>
       </article>
     </template>
 
     <script>
       const playersEl = document.getElementById("players");
+      const playersHeaderEl = document.getElementById("playersHeader");
       const emptyEl = document.getElementById("empty");
       const statusEl = document.getElementById("status");
       const addPlayerForm = document.getElementById("addPlayerForm");
       const playerNameInput = document.getElementById("playerName");
       const resetBtn = document.getElementById("resetBtn");
+      const deleteAllBtn = document.getElementById("deleteAllBtn");
+      const headerTitleInput = document.getElementById("headerTitle");
       const sortModeSelect = document.getElementById("sortMode");
       const playerTemplate = document.getElementById("playerTemplate");
 
       let state = { players: [], sort_mode: "turn" };
+      let draggedRow = null;
+      let pauseRefreshUntil = 0;
+      const addScoreDrafts = new Map();
+      const playerNameDrafts = new Map();
+      let headerTitleDraft = "";
 
-      function setStatus(message) {
+      function setStatus(message, level = "error") {
         statusEl.textContent = message || "";
+        statusEl.classList.remove("success");
+        if (message && level === "success") {
+          statusEl.classList.add("success");
+        }
+      }
+
+      function clearDropIndicators() {
+        playersEl.querySelectorAll(".row.drop-before, .row.drop-after").forEach((row) => {
+          row.classList.remove("drop-before", "drop-after");
+        });
+      }
+
+      function pauseAutoRefresh(ms = 3000) {
+        pauseRefreshUntil = Math.max(pauseRefreshUntil, Date.now() + ms);
+      }
+
+      function isEnterPress(event) {
+        const key = String(event.key || "");
+        const mobileEnterKeys = new Set(["Go", "Done", "Next", "Return", "Send", "Search"]);
+        return (
+          key === "Enter" ||
+          key === "NumpadEnter" ||
+          mobileEnterKeys.has(key) ||
+          event.code === "Enter" ||
+          event.code === "NumpadEnter" ||
+          event.keyCode === 13
+        );
+      }
+
+      function focusPlayerField(playerId, selector) {
+        if (!Number.isInteger(playerId)) {
+          return false;
+        }
+        const row = playersEl.querySelector(`.row[data-player-id="${playerId}"]`);
+        const input = row ? row.querySelector(selector) : null;
+        if (!input) {
+          return false;
+        }
+        input.focus();
+        if (typeof input.select === "function") {
+          input.select();
+        }
+        return true;
+      }
+
+      function focusSameColumnAfterSubmit(currentPlayerId, nextPlayerId, selector) {
+        requestAnimationFrame(() => {
+          if (focusPlayerField(nextPlayerId, selector)) {
+            return;
+          }
+          focusPlayerField(currentPlayerId, selector);
+        });
+      }
+
+      function isEditingField() {
+        const active = document.activeElement;
+        if (!active) {
+          return false;
+        }
+        return active.matches("input, textarea, select");
       }
 
       async function api(path, options = {}) {
@@ -284,26 +582,236 @@
       function render() {
         playersEl.innerHTML = "";
         const players = state.players || [];
+        const canDrag = state.sort_mode === "turn";
+        playersHeaderEl.style.display = players.length ? "grid" : "none";
         emptyEl.style.display = players.length ? "none" : "block";
+        let rowIndex = 0;
 
         for (const player of players) {
+          const currentRowIndex = rowIndex;
+          rowIndex += 1;
           const node = playerTemplate.content.firstElementChild.cloneNode(true);
-          node.querySelector(".title").textContent = player.name;
-          node.querySelector(".meta").textContent = `Turn ${player.turn_order}`;
+          node.dataset.playerId = String(player.id);
+          node.draggable = canDrag;
+          node.classList.toggle("drag-disabled", !canDrag);
+          const titleInput = node.querySelector(".title");
+          const metaEl = node.querySelector(".meta");
+          titleInput.value = playerNameDrafts.get(player.id) || player.name;
+          metaEl.textContent = state.sort_mode === "score" ? `Player ${player.turn_order}` : "";
 
           const scoreInput = node.querySelector(".score");
+          const addScoreInput = node.querySelector(".add-score");
+          const addBtn = node.querySelector(".add-btn");
+          const deleteBtn = node.querySelector(".delete-btn");
+          const dragHandle = node.querySelector(".drag-handle");
           scoreInput.value = player.score;
+          addScoreInput.value = addScoreDrafts.get(player.id) || "";
+          dragHandle.disabled = !canDrag;
 
-          node.querySelector(".minus").addEventListener("click", async () => {
-            await updatePlayerScore(player.id, Number(scoreInput.value || 0) - 1);
-          });
-
-          node.querySelector(".plus").addEventListener("click", async () => {
-            await updatePlayerScore(player.id, Number(scoreInput.value || 0) + 1);
-          });
+          // Keep mobile keyboard "next" navigation moving down each input column.
+          titleInput.tabIndex = 1000 + currentRowIndex;
+          scoreInput.tabIndex = 2000 + currentRowIndex;
+          addScoreInput.tabIndex = 3000 + currentRowIndex;
 
           scoreInput.addEventListener("change", async () => {
             await updatePlayerScore(player.id, Number(scoreInput.value || 0));
+          });
+
+          titleInput.addEventListener("input", () => {
+            playerNameDrafts.set(player.id, titleInput.value);
+            pauseAutoRefresh();
+          });
+
+          titleInput.addEventListener("change", async () => {
+            const trimmedName = titleInput.value.trim();
+            if (!trimmedName) {
+              titleInput.value = player.name;
+              playerNameDrafts.delete(player.id);
+              setStatus("Player name cannot be empty.");
+              return;
+            }
+            if (trimmedName === player.name) {
+              playerNameDrafts.delete(player.id);
+              return;
+            }
+            const success = await updatePlayerName(player.id, titleInput.value);
+            if (success) {
+              playerNameDrafts.delete(player.id);
+            }
+          });
+
+          titleInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              titleInput.blur();
+            }
+          });
+
+          scoreInput.addEventListener("keydown", async (event) => {
+            if (isEnterPress(event)) {
+              event.preventDefault();
+              const nextPlayerId = Number(node.nextElementSibling?.dataset.playerId);
+              const success = await updatePlayerScore(player.id, Number(scoreInput.value || 0));
+              if (success) {
+                focusSameColumnAfterSubmit(player.id, nextPlayerId, ".score");
+              }
+            }
+          });
+
+          let isSubmittingAddScore = false;
+
+          async function submitAddScore() {
+            if (isSubmittingAddScore) {
+              return false;
+            }
+
+            isSubmittingAddScore = true;
+            pauseAutoRefresh();
+            const draftValue = addScoreInput.value;
+            const delta = Number(draftValue || 0);
+            if (!Number.isFinite(delta) || delta === 0) {
+              isSubmittingAddScore = false;
+              setStatus("Enter a non-zero add score value.");
+              return false;
+            }
+            const success = await addPlayerScore(player.id, delta);
+            if (success) {
+              addScoreDrafts.delete(player.id);
+              render();
+            }
+            isSubmittingAddScore = false;
+            return success;
+          }
+
+          addBtn.addEventListener("click", async () => {
+            await submitAddScore();
+          });
+
+          addScoreInput.addEventListener("input", () => {
+            addScoreDrafts.set(player.id, addScoreInput.value);
+            pauseAutoRefresh();
+          });
+
+          addScoreInput.addEventListener("keydown", async (event) => {
+            if (isEnterPress(event)) {
+              event.preventDefault();
+              const nextPlayerId = Number(node.nextElementSibling?.dataset.playerId);
+              const success = await submitAddScore();
+              if (success) {
+                focusSameColumnAfterSubmit(player.id, nextPlayerId, ".add-score");
+              }
+            }
+          });
+
+          addScoreInput.addEventListener("focusout", async (event) => {
+            const nextField = event.relatedTarget;
+            const isMovingToAddScoreField = nextField instanceof HTMLElement && nextField.matches(".add-score");
+            if (!isMovingToAddScoreField || isSubmittingAddScore) {
+              return;
+            }
+
+            const draftValue = addScoreInput.value;
+            const delta = Number(draftValue || 0);
+            if (!Number.isFinite(delta) || delta === 0) {
+              return;
+            }
+
+            await submitAddScore();
+          });
+
+          deleteBtn.addEventListener("click", async () => {
+            await deletePlayer(player.id);
+          });
+
+          dragHandle.addEventListener("mousedown", () => {
+            node.draggable = canDrag;
+          });
+
+          dragHandle.addEventListener("touchstart", (event) => {
+            if (!canDrag) return;
+            event.preventDefault();
+            draggedRow = node;
+            clearDropIndicators();
+            node.classList.add("dragging");
+          }, { passive: false });
+
+          dragHandle.addEventListener("touchmove", (event) => {
+            if (!draggedRow || !canDrag) return;
+            event.preventDefault();
+            const touch = event.touches[0];
+            draggedRow.style.visibility = "hidden";
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            draggedRow.style.visibility = "";
+            if (!elementBelow) return;
+            const targetRow = elementBelow.closest(".row");
+            if (!targetRow || targetRow === draggedRow) return;
+            clearDropIndicators();
+            const rect = targetRow.getBoundingClientRect();
+            const shouldInsertAfter = touch.clientY > rect.top + rect.height / 2;
+            const referenceNode = shouldInsertAfter ? targetRow.nextElementSibling : targetRow;
+            if (referenceNode !== draggedRow) {
+              playersEl.insertBefore(draggedRow, referenceNode);
+            }
+          }, { passive: false });
+
+          dragHandle.addEventListener("touchend", async () => {
+            if (draggedRow) {
+              draggedRow.classList.remove("dragging");
+              draggedRow = null;
+              clearDropIndicators();
+              await persistOrderFromDom();
+            }
+          });
+
+          dragHandle.addEventListener("touchcancel", () => {
+            if (draggedRow) {
+              draggedRow.classList.remove("dragging");
+              draggedRow = null;
+              clearDropIndicators();
+            }
+          });
+
+          node.addEventListener("dragstart", (event) => {
+            if (!canDrag) {
+              event.preventDefault();
+              return;
+            }
+            draggedRow = node;
+            clearDropIndicators();
+            node.classList.add("dragging");
+            event.dataTransfer.effectAllowed = "move";
+          });
+
+          node.addEventListener("dragend", async () => {
+            if (draggedRow) {
+              draggedRow.classList.remove("dragging");
+              draggedRow = null;
+              clearDropIndicators();
+              await persistOrderFromDom();
+            }
+          });
+
+          node.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            if (!canDrag) {
+              return;
+            }
+            if (!draggedRow || draggedRow === node) {
+              return;
+            }
+
+            clearDropIndicators();
+            const rect = node.getBoundingClientRect();
+            const shouldInsertAfter = event.clientY > rect.top + rect.height / 2;
+            const referenceNode = shouldInsertAfter ? node.nextElementSibling : node;
+            node.classList.add(shouldInsertAfter ? "drop-after" : "drop-before");
+            if (referenceNode !== draggedRow) {
+              playersEl.insertBefore(draggedRow, referenceNode);
+            }
+          });
+
+          node.addEventListener("dragleave", () => {
+            node.classList.remove("drop-before", "drop-after");
           });
 
           playersEl.appendChild(node);
@@ -312,8 +820,32 @@
 
       async function refreshState() {
         state = await api("/api/state");
+        const titleFromState = state.header_title || "Digital Scoreboard";
+        if (document.activeElement !== headerTitleInput) {
+          headerTitleInput.value = titleFromState;
+          headerTitleDraft = titleFromState;
+        }
         sortModeSelect.value = state.sort_mode;
         render();
+      }
+
+      async function updateHeaderTitle(title) {
+        try {
+          pauseAutoRefresh();
+          state = await api("/api/header-title", {
+            method: "PUT",
+            body: JSON.stringify({ title }),
+          });
+          const updatedTitle = state.header_title || "Digital Scoreboard";
+          headerTitleInput.value = updatedTitle;
+          headerTitleDraft = updatedTitle;
+          setStatus("");
+          render();
+          return true;
+        } catch (error) {
+          setStatus(error.message);
+          return false;
+        }
       }
 
       async function updatePlayerScore(playerId, score) {
@@ -321,6 +853,104 @@
           state = await api(`/api/players/${playerId}/score`, {
             method: "PUT",
             body: JSON.stringify({ score }),
+          });
+          setStatus("");
+          render();
+          return true;
+        } catch (error) {
+          setStatus(error.message);
+          return false;
+        }
+      }
+
+      async function updatePlayerName(playerId, name) {
+        try {
+          pauseAutoRefresh();
+          state = await api(`/api/players/${playerId}/name`, {
+            method: "PUT",
+            body: JSON.stringify({ name }),
+          });
+          setStatus("");
+          render();
+          return true;
+        } catch (error) {
+          setStatus(error.message);
+          return false;
+        }
+      }
+
+      async function addPlayerScore(playerId, delta) {
+        try {
+          pauseAutoRefresh();
+          state = await api(`/api/players/${playerId}/add-score`, {
+            method: "POST",
+            body: JSON.stringify({ delta }),
+          });
+          setStatus("");
+          return true;
+        } catch (error) {
+          setStatus(error.message);
+          return false;
+        }
+      }
+
+      async function persistOrderFromDom() {
+        if (state.sort_mode !== "turn") {
+          return;
+        }
+
+        const playerIds = Array.from(playersEl.children)
+          .map((row) => Number(row.dataset.playerId))
+          .filter((id) => Number.isInteger(id));
+
+        const uniqueIds = [];
+        const seenIds = new Set();
+        for (const id of playerIds) {
+          if (seenIds.has(id)) {
+            continue;
+          }
+          uniqueIds.push(id);
+          seenIds.add(id);
+        }
+
+        if (!uniqueIds.length) {
+          return;
+        }
+
+        const existingOrder = (state.players || []).map((player) => player.id);
+        const existingSet = new Set(existingOrder);
+        const requestMatchesPlayers =
+          uniqueIds.length === existingOrder.length &&
+          uniqueIds.every((id) => existingSet.has(id));
+
+        if (!requestMatchesPlayers) {
+          await refreshState();
+          return;
+        }
+
+        const hasChanged = uniqueIds.some((id, index) => id !== existingOrder[index]);
+        if (!hasChanged) {
+          return;
+        }
+
+        try {
+          state = await api("/api/players/reorder", {
+            method: "PUT",
+            body: JSON.stringify({ player_ids: uniqueIds }),
+          });
+          sortModeSelect.value = state.sort_mode;
+          setStatus("Turn order updated.", "success");
+          render();
+        } catch (error) {
+          setStatus(error.message);
+          await refreshState();
+        }
+      }
+
+      async function deletePlayer(playerId) {
+        try {
+          state = await api(`/api/players/${playerId}`, {
+            method: "DELETE",
           });
           setStatus("");
           render();
@@ -345,6 +975,11 @@
       });
 
       resetBtn.addEventListener("click", async () => {
+        const confirmed = window.confirm("Reset all scores to zero?");
+        if (!confirmed) {
+          return;
+        }
+
         try {
           state = await api("/api/reset", { method: "POST" });
           setStatus("Scores reset for a new game.");
@@ -354,8 +989,53 @@
         }
       });
 
+      deleteAllBtn.addEventListener("click", async () => {
+        const confirmed = window.confirm("Delete all players? This cannot be undone.");
+        if (!confirmed) {
+          return;
+        }
+
+        try {
+          state = await api("/api/players", { method: "DELETE" });
+          setStatus("All players removed.");
+          render();
+        } catch (error) {
+          setStatus(error.message);
+        }
+      });
+
+      headerTitleInput.addEventListener("input", () => {
+        headerTitleDraft = headerTitleInput.value;
+        pauseAutoRefresh();
+      });
+
+      headerTitleInput.addEventListener("change", async () => {
+        const trimmedTitle = headerTitleInput.value.trim();
+        if (!trimmedTitle) {
+          headerTitleInput.value = headerTitleDraft || state.header_title || "Digital Scoreboard";
+          setStatus("Header title cannot be empty.");
+          return;
+        }
+
+        const currentTitle = state.header_title || "Digital Scoreboard";
+        if (trimmedTitle === currentTitle) {
+          headerTitleDraft = currentTitle;
+          return;
+        }
+
+        await updateHeaderTitle(headerTitleInput.value);
+      });
+
+      headerTitleInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          headerTitleInput.blur();
+        }
+      });
+
       sortModeSelect.addEventListener("change", async () => {
         try {
+          pauseAutoRefresh();
           state = await api("/api/sort-mode", {
             method: "PUT",
             body: JSON.stringify({ sort_mode: sortModeSelect.value }),
@@ -368,7 +1048,14 @@
       });
 
       refreshState().catch((error) => setStatus(error.message));
-      setInterval(() => refreshState().catch(() => {}), 2500);
+      playersEl.addEventListener("pointerdown", () => pauseAutoRefresh());
+      playersEl.addEventListener("focusin", () => pauseAutoRefresh());
+      setInterval(() => {
+        if (draggedRow || isEditingField() || Date.now() < pauseRefreshUntil) {
+          return;
+        }
+        refreshState().catch(() => {});
+      }, 2500);
     </script>
   </body>
 </html>

@@ -5,4 +5,4 @@ homepi:
 
   config:
     scoreboard:
-      default:
+      default: {}

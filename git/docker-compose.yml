@@ -40,8 +40,6 @@ services:
         - homepage.icon=sh-gitea
         - homepage.href=https://git.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
         # - homepage.description=Git
-    depends_on:
-      - gitea-db
 
   gitea-db:
     image: postgres:18

@@ -3,8 +3,8 @@
 set -euo pipefail
 
 # Ensure required service data folders exist.
-STACK_NAME="budget"
-SERVICE_FOLDERS="actual-budget actual-budget/helpers-cache"
+STACK_NAME="infra-monitor"
+SERVICE_FOLDERS="mzabbix/postgres_db"
 
 for folder in $SERVICE_FOLDERS; do
 	echo "Creating folder: $folder..."

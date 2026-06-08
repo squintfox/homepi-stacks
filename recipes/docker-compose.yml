@@ -3,8 +3,6 @@ services:
     image: ghcr.io/mealie-recipes/mealie
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/mealie/data:/app/data
-    depends_on:
-      - mealie-db
     environment:
       # VAULT
       SECRET_KEY: ${RECIPES_SECRET_KEY}
@@ -30,6 +28,9 @@ services:
       OPENAI_BASE_URL: null
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       ALLOW_SIGNUP: "true"
+    # i have no idea why this choose to break a lot
+    healthcheck:
+      disable: true
     networks:
       - webproxy-backend
     labels:

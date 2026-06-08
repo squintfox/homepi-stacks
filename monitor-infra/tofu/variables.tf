@@ -25,12 +25,15 @@ variable "HPI_TFSTATE_PASSPHRASE" {
 variable "HPI_DESEC_TOKEN" {
   type        = string
 }
-variable "HOMEASSISTANT_DB_DATABASE" {
+variable "HPI_TIME_ZONE" {
   type        = string
 }
-variable "HOMEASSISTANT_DB_USERNAME" {
+variable "ZABBIX_DB_DATABASE" {
   type        = string
 }
-variable "HOMEASSISTANT_DB_PASSWORD" {
+variable "ZABBIX_DB_USERNAME" {
+  type        = string
+}
+variable "ZABBIX_DB_PASSWORD" {
   type        = string
 }

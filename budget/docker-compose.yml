@@ -16,7 +16,7 @@ services:
       - ${HPI_LOCAL_DATA_PATH}/actual-budget:/data
     healthcheck:
       # Enable health check for the instance
-      test: ['CMD-SHELL', 'node src/scripts/health-check.js']
+      test: ["CMD-SHELL", "node src/scripts/health-check.js"]
       interval: 60s
       timeout: 10s
       retries: 3
@@ -31,7 +31,7 @@ services:
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
     deploy:
       labels:
-        homepage.group: Finance  
+        homepage.group: Finance
         homepage.name: Budget
         homepage.icon: sh-actual-budget
         homepage.href: https://budget.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
@@ -47,8 +47,6 @@ services:
       - API_KEY=${ACTUAL_API_PASSWORD}
     networks:
       - webproxy-backend
-    depends_on:
-      - actual
     labels:
       caddy: budget-api.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 5007}}"
@@ -57,33 +55,98 @@ services:
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
     deploy:
       labels:
-        - homepage.group=Finance  
+        - homepage.group=Finance
         - homepage.name=Actual API
         - homepage.icon=sh-swagger
         - homepage.href=https://budget-api.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/api-docs/
 
-  auto_sync:
-    image: seriouslag/actual-auto-sync:latest
-    depends_on:
-      - actual
+  helper: &helper-base
+    image: ghcr.io/psybers/actual-helpers:latest
     environment:
       - ACTUAL_SERVER_URL=https://budget.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
       - ACTUAL_SERVER_PASSWORD=${ACTUAL_BUDGET_PASSWORD}
-      # Sync every day at 5:00, 14:00, 15:00 and 18:00
-      - CRON_SCHEDULE=0 5,14,15,18 * * *
-      - LOG_LEVEL=info
-      - ACTUAL_BUDGET_SYNC_IDS=${ACTUAL_BUDGET_SYNC_ID}
-      # Optional environment variables for encryption (if enabled in the app settings)
-      # - ENCRYPTION_PASSWORDS=password1
-      - TIMEZONE=${HPI_TIME_ZONE}
-      - RUN_ON_START=true
+      - ACTUAL_SYNC_ID=${ACTUAL_BUDGET_SYNC_ID}
+      # # do not allow self-signed SSL certs
+      - NODE_TLS_REJECT_UNAUTHORIZED=1
+      # # optional, for encrypted files
+      # - ACTUAL_FILE_PASSWORD="<file password>"
+      # optional, if you want to use a different cache directory
+      # - ACTUAL_CACHE_DIR="./cache"
+      # # optional, name of the payee for added interest transactions
+      # - INTEREST_PAYEE_NAME="Loan Interest"
+      # # optional, name of the payee for added investment transactions
+      # - INVESTMENT_PAYEE_NAME="Investment"
+      # # optional, name of the category group for added investment tracking transactions
+      # - INVESTMENT_CATEGORY_GROUP_NAME="Income"
+      # # optional, name of the category for added investment tracking transactions
+      # - INVESTMENT_CATEGORY_NAME="Investment"
+      # optional, name of the payee for Zestimate entries
+      - ZESTIMATE_PAYEE_NAME="Zillow"
+      # optional, name of the payee for KBB entries
+      - KBB_PAYEE_NAME="Kelley Blue Book"
+      # # optional, the URL for tracking Bitcoin prices
+      # - BITCOIN_PRICE_URL="https://api.kraken.com/0/public/Ticker?pair=xbtusd"
+      # # optional, the JSON path in the response to get the Bitcoin price
+      # - BITCOIN_PRICE_JSON_PATH="result.XXBTZUSD.c[0]"
+      # # optional, name of the payee for Bitcoin entries
+      # - BITCOIN_PAYEE_NAME="Bitcoin Price Change"
+      # # optional, RentCast API key for fetching property data
+      # - RENTCAST_API_KEY="<Rentcast API key>"
+      # - RENTCAST_PAYEE_NAME="RentCast"
     networks:
       - webproxy-backend
-      # this works, but the software is out of date vs actual 26.4.0, i need to wait for the update
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/actual-budget/helpers-cache:/usr/src/app/cache
     deploy:
       replicas: 0
       restart_policy:
         condition: none
+
+  helper-kbb:
+    <<: *helper-base
+    entrypoint: ["node"]
+    command: ["kbb.js"]
+    deploy:
+      replicas: 0
+      restart_policy:
+        condition: none
+      labels:
+        - swarm.cronjob.enable=true
+        # Start service every Tuesday at 3 AM
+        - swarm.cronjob.schedule=0 3 * * 2
+        - swarm.cronjob.skip-running=true
+
+  # helper-zestimate:
+  #   <<: *helper-base
+  #   entrypoint: ["sh", "-c"]
+  #   # TODO: this is erroring out
+  #   command:
+  #     - |
+  #       node -e "const fs=require('fs'); const p='zestimate.js'; let s=fs.readFileSync(p,'utf8'); if(!s.includes('--no-sandbox')) { s=s.replace('.forBrowser(Browser.CHROME)\n        .build();', '.forBrowser(Browser.CHROME)\n        .setChromeOptions((new (require(\'selenium-webdriver/chrome\').Options)()).addArguments(\'--headless=new\',\'--no-sandbox\',\'--disable-dev-shm-usage\',\'--disable-gpu\',\'--remote-debugging-port=9222\'))\n        .build();'); fs.writeFileSync(p,s); }"
+  #       node zestimate.js
+  #   deploy:
+  #     replicas: 0
+  #     restart_policy:
+  #       condition: none
+  #     labels:
+  #       - swarm.cronjob.enable=true
+  #       # Start service every Wednesday at 3 AM
+  #       - swarm.cronjob.schedule=0 3 * * 3
+  #       - swarm.cronjob.skip-running=true
+
+  helper-bank-sync:
+    <<: *helper-base
+    entrypoint: ["node"]
+    command: ["sync-banks.js"]
+    deploy:
+      replicas: 0
+      restart_policy:
+        condition: none
+      labels:
+        - swarm.cronjob.enable=true
+        # Start service at 6AM, 3PM and 5PM daily
+        - swarm.cronjob.schedule=0 6,15,17 * * *
+        - swarm.cronjob.skip-running=true
 
 networks:
   webproxy-backend:

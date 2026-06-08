@@ -1,0 +1,61 @@
+services:
+  zabbix-server:
+    image: zabbix/zabbix-server-pgsql:alpine-7.0-latest
+    environment:
+      # VAULT
+      POSTGRES_USER: ${ZABBIX_DB_USERNAME}
+      POSTGRES_PASSWORD: ${ZABBIX_DB_PASSWORD}
+      # configtool
+      POSTGRES_DB: ${ZABBIX_DB_DATABASE}
+      # static
+      DB_SERVER_HOST: zabbix-db
+    networks:
+      - webproxy-backend
+
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-pgsql:alpine-7.0-latest
+    environment:
+      # VAULT
+      POSTGRES_USER: ${ZABBIX_DB_USERNAME}
+      POSTGRES_PASSWORD: ${ZABBIX_DB_PASSWORD}
+      PHP_TZ: ${HPI_TIME_ZONE}
+      # configtool
+      POSTGRES_DB: ${ZABBIX_DB_DATABASE}
+      # static
+      ZBX_SERVER_HOST: zabbix-server
+      DB_SERVER_HOST: zabbix-db
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: infra-monitoring.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 8080}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        homepage.group: Monitoring 
+        homepage.name: Infra Monitoring
+        homepage.icon: sh-zabbix
+        homepage.href: https://infra-monitoring.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+  zabbix-db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: ${ZABBIX_DB_DATABASE}
+      # VAULT
+      POSTGRES_USER: ${ZABBIX_DB_USERNAME}
+      POSTGRES_PASSWORD: ${ZABBIX_DB_PASSWORD}
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/zabbix/postgres_db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - webproxy-backend
+
+networks:
+  webproxy-backend:
+    external: true

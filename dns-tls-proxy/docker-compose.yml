@@ -58,8 +58,6 @@ services:
 
   acme-desec:
     image: neilpang/acme.sh:latest
-    depends_on:
-      - proxy
     environment:
       - DEDYN_TOKEN=${HPI_DESEC_TOKEN}
       - LE_EMAIL=${HPI_PRIMARY_EMAIL}
