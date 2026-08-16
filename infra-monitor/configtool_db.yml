@@ -7,7 +7,7 @@ homepi:
     infra-monitor:
       default:
         hpi_zabbix_db_database:
-          value: zabbix-db
+          value: zabbix
           env:
             - ZABBIX_DB_DATABASE
             - TF_VAR_ZABBIX_DB_DATABASE

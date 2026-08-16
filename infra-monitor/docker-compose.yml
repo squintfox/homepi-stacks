@@ -1,26 +1,27 @@
 services:
   zabbix-server:
-    image: zabbix/zabbix-server-pgsql:alpine-7.0-latest
+    image: zabbix/zabbix-server-mysql:alpine-7.4-latest
     environment:
       # VAULT
-      POSTGRES_USER: ${ZABBIX_DB_USERNAME}
-      POSTGRES_PASSWORD: ${ZABBIX_DB_PASSWORD}
+      MYSQL_USER: ${ZABBIX_DB_USERNAME}
+      MYSQL_PASSWORD: ${ZABBIX_DB_PASSWORD}
       # configtool
-      POSTGRES_DB: ${ZABBIX_DB_DATABASE}
+      MYSQL_DATABASE: ${ZABBIX_DB_DATABASE}
       # static
       DB_SERVER_HOST: zabbix-db
+      ZBX_ALLOWUNSUPPORTEDDBVERSIONS: "1"  # allows the use of newer MariaDB versions that are not officially supported yet
     networks:
       - webproxy-backend
 
   zabbix-web:
-    image: zabbix/zabbix-web-nginx-pgsql:alpine-7.0-latest
+    image: zabbix/zabbix-web-nginx-mysql:alpine-7.4-latest
     environment:
       # VAULT
-      POSTGRES_USER: ${ZABBIX_DB_USERNAME}
-      POSTGRES_PASSWORD: ${ZABBIX_DB_PASSWORD}
+      MYSQL_USER: ${ZABBIX_DB_USERNAME}
+      MYSQL_PASSWORD: ${ZABBIX_DB_PASSWORD}
       PHP_TZ: ${HPI_TIME_ZONE}
       # configtool
-      POSTGRES_DB: ${ZABBIX_DB_DATABASE}
+      MYSQL_DATABASE: ${ZABBIX_DB_DATABASE}
       # static
       ZBX_SERVER_HOST: zabbix-server
       DB_SERVER_HOST: zabbix-db
@@ -35,21 +36,36 @@ services:
     deploy:
       labels:
         homepage.group: Monitoring 
-        homepage.name: Infra Monitoring
+        homepage.name: Infra Monitor
         homepage.icon: sh-zabbix
         homepage.href: https://infra-monitoring.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
-  zabbix-db:
-    image: postgres:18
+  zabbix-agent2:
+    image: zabbix/zabbix-agent2:alpine-7.4-latest
     environment:
-      POSTGRES_DB: ${ZABBIX_DB_DATABASE}
-      # VAULT
-      POSTGRES_USER: ${ZABBIX_DB_USERNAME}
-      POSTGRES_PASSWORD: ${ZABBIX_DB_PASSWORD}
+      ZBX_SERVER_HOST: zabbix-server
+      ZBX_SERVER_PORT: 10051
+      ZBX_PASSIVE_ALLOW: "false"
+      ZBX_HOSTNAME: zabbix-agent2
     volumes:
-      - ${HPI_LOCAL_DATA_PATH}/zabbix/postgres_db:/var/lib/postgresql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      - /:/host/rootfs:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - webproxy-backend
+
+  zabbix-db:
+    image: mariadb:latest
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/zabbix/mysql_db:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: ${ZABBIX_DB_DATABASE}
+      # VAULT
+      MYSQL_USER: ${ZABBIX_DB_USERNAME}
+      MYSQL_PASSWORD: ${ZABBIX_DB_PASSWORD}
+      # static
+      MYSQL_ROOT_PASSWORD: ${ZABBIX_DB_PASSWORD}  # sets the root password to the same as the zabbix user password for provisioning convenience
       interval: 30s
       timeout: 20s
       retries: 3

@@ -10,7 +10,7 @@ services:
       - ${HPI_LOCAL_DATA_PATH}/homeassistant/postgres_db:/var/lib/postgresql
     networks:
       - webproxy-backend
-
+      
   homeassistant:
     image: homeassistant/home-assistant:stable
     volumes:

@@ -142,6 +142,20 @@ services:
     networks:
       - webproxy-backend
 
+  snipe-mcp:
+    image: registry.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/snipe-mcp:latest
+    user: "${HPI_APP_UID:-1000}:${HPI_APP_GID:-1000}"
+    environment:
+      SNIPEIT_URL: https://assets.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+      SNIPEIT_TOKEN: dummy_token  # needs to exist but has no effect
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: assets.${HPI_DNS_DOMAIN}
+      caddy.handle_path: /mcp*
+      caddy.handle_path.0_rewrite: "* /mcp{path}"
+      caddy.handle_path.1_reverse_proxy: http://snipe-mcp:8001
+
 networks:
   webproxy-backend:
     external: true

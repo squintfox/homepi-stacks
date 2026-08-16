@@ -56,7 +56,7 @@ services:
     deploy:
       labels:
         - homepage.group=Finance
-        - homepage.name=Actual API
+        - homepage.name=Budget API
         - homepage.icon=sh-swagger
         - homepage.href=https://budget-api.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/api-docs/
 
@@ -81,9 +81,9 @@ services:
       # # optional, name of the category for added investment tracking transactions
       # - INVESTMENT_CATEGORY_NAME="Investment"
       # optional, name of the payee for Zestimate entries
-      - ZESTIMATE_PAYEE_NAME="Zillow"
+      - ZESTIMATE_PAYEE_NAME=Zillow
       # optional, name of the payee for KBB entries
-      - KBB_PAYEE_NAME="Kelley Blue Book"
+      - KBB_PAYEE_NAME=Kelley Blue Book
       # # optional, the URL for tracking Bitcoin prices
       # - BITCOIN_PRICE_URL="https://api.kraken.com/0/public/Ticker?pair=xbtusd"
       # # optional, the JSON path in the response to get the Bitcoin price

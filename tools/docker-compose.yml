@@ -9,10 +9,12 @@ services:
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
-      homepage.group: Tools  
-      homepage.name: IT Tools  
-      homepage.icon: sh-it-tools
-      homepage.href: https://it-tools.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+    deploy:
+      labels:
+        homepage.group: Tools  
+        homepage.name: IT Tools  
+        homepage.icon: sh-it-tools
+        homepage.href: https://it-tools.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   stirling-pdf:
     image: stirlingtools/stirling-pdf:latest

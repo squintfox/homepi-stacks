@@ -3,6 +3,7 @@
 **/.env
 configtool_db.user.yml
 .archive/
+.vscode/
 
 # for python environment dev
 .venv*/

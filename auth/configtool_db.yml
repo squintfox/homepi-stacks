@@ -1,0 +1,26 @@
+homepi:
+  environments:
+    base:
+      - auth.default
+
+  config:
+    auth:
+      default:
+        hpi_auth_session_secret:
+          value: hpi_auth_session_secret
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_AUTH_SESSION_SECRET
+            - TF_VAR_HPI_AUTH_SESSION_SECRET
+        hpi_auth_jwt_secret:
+          value: hpi_auth_jwt_secret
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_AUTH_JWT_SECRET
+            - TF_VAR_HPI_AUTH_JWT_SECRET
+        hpi_auth_storage_encryption_key:
+          value: hpi_auth_storage_encryption_key
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_AUTH_STORAGE_ENCRYPTION_KEY
+            - TF_VAR_HPI_AUTH_STORAGE_ENCRYPTION_KEY
