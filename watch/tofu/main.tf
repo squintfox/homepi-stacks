@@ -83,6 +83,10 @@ resource "portainer_stack" "watch" {
     name  = "HPI_TIME_ZONE"
     value = var.HPI_TIME_ZONE
   }
+  env {
+    name  = "HPI_LOCAL_IP_ADDRESS"
+    value = var.HPI_LOCAL_IP_ADDRESS
+  }
 
   lifecycle {
     ignore_changes = [repository_reference_name]

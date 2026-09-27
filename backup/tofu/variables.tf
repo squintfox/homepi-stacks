@@ -3,15 +3,19 @@ variable "HPI_PORTAINER_TOKEN" {
   type        = string
   sensitive   = true
 }
+
 variable "HPI_DNS_DOMAIN" {
   type        = string
 }
+
 variable "HPI_HTTPS_PORT" {
   type        = string
 }
+
 variable "HPI_STACKS_REPO_URL" {
   type        = string
 }
+
 variable "HPI_LOCAL_DATA_PATH" {
   type        = string
 }
@@ -20,29 +24,26 @@ variable "HPI_TFSTATE_PASSPHRASE" {
   sensitive   = true
 }
 
-# /required
-
 variable "HPI_DESEC_TOKEN" {
   type        = string
 }
-variable "HPI_TIME_ZONE" {
-  type = string
-}
-variable "ACTUAL_BUDGET_SYNC_ID" {
-  type = string
-}
-variable "ACTUAL_BUDGET_PASSWORD" {
-  type        = string
-  sensitive   = true
-}
-variable "ACTUAL_API_PASSWORD" {
-  type        = string
-  sensitive   = true
-}
-variable "ACTUAL_OPENID_CLIENT_USERNAME" {
+
+variable "HPI_APP_UID" {
   type        = string
 }
-variable "ACTUAL_OPENID_CLIENT_SECRET" {
+
+variable "HPI_APP_GID" {
   type        = string
-  sensitive   = true
+}
+
+variable "PLUTON_ENCRYPTION_KEY" {
+  type        = string
+}
+
+variable "PLUTON_ADMIN_USERNAME" {
+  type        = string
+}
+
+variable "PLUTON_ADMIN_PASSWORD" {
+  type        = string
 }

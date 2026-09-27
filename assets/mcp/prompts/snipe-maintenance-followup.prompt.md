@@ -31,11 +31,12 @@ Required workflow
 7. After asset selection, list only uncompleted maintenances for that asset.
 8. Use the maintenance description input to match the correct uncompleted maintenance. Show the candidate(s) to the user and ask for confirmation if there is more than one plausible match.
 9. Never select a completed maintenance as the original maintenance. Exclude completed records from matching and from the original-selection process.
-10. If there are no uncompleted maintenances for the selected asset, stop and ask the user to confirm whether they want to create a new maintenance instead of trying to clone an existing one.
-11. If the user confirms creating a new maintenance, create the follow-up maintenance by copying the relevant details from the matched maintenance, but leave cost blank and supplier blank.
-12. Interpret the expected date input as natural language (example: `in 6 months`) and set expected completion date from today.
-13. Only after successful creation, complete the original active maintenance.
-14. Return a concise summary with asset id, original maintenance id, new maintenance id, and expected completion date.
+10. Treat `expected_completion_date` and `completed_at` as separate fields. `expected_completion_date` is never relevant to completion status, maintenance matching, or eligibility. Use `completed_at` to determine whether a maintenance is completed: a non-null value means completed, and a null value means uncompleted.
+11. If there are no uncompleted maintenances for the selected asset, stop and ask the user to confirm whether they want to create a new maintenance instead of trying to clone an existing one.
+12. If the user confirms creating a new maintenance, create the follow-up maintenance by copying the relevant details from the matched maintenance, but leave cost blank and supplier blank.
+13. Interpret the expected date input as natural language (example: `in 6 months`) and set expected completion date from today. This user-provided date is the only use of expected completion date in this workflow; never use an existing maintenance's `expected_completion_date`.
+14. Only after successful creation, complete the original active maintenance.
+15. Return a concise summary with asset id, original maintenance id, new maintenance id, and expected completion date.
 
 Safety rules
 

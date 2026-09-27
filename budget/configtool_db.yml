@@ -25,3 +25,15 @@ homepi:
           env:
             - ACTUAL_API_PASSWORD
             - TF_VAR_ACTUAL_API_PASSWORD
+        hpi_actual_openid_client_username:
+          value: hpi_actual_openid_client
+          secret_namespace: homepi_secrets.vault
+          env:
+            - ACTUAL_OPENID_CLIENT_USERNAME
+            - TF_VAR_ACTUAL_OPENID_CLIENT_USERNAME
+        hpi_actual_openid_client_secret:
+          value: hpi_actual_openid_client
+          secret_namespace: homepi_secrets.vault
+          env:
+            - ACTUAL_OPENID_CLIENT_SECRET
+            - TF_VAR_ACTUAL_OPENID_CLIENT_SECRET

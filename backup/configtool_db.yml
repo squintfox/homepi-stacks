@@ -1,0 +1,27 @@
+homepi:
+  environments:
+    base:
+      - pluton.default
+
+  config:
+    pluton:
+      default:
+        # vaultwarden can have u and p for each item, postpend _username to get the username
+        hpi_pluton_encryption_key:
+          value: hpi_pluton_encryption_key
+          secret_namespace: homepi_secrets.vault
+          env:
+            - PLUTON_ENCRYPTION_KEY
+            - TF_VAR_PLUTON_ENCRYPTION_KEY
+        hpi_pluton_admin_username:
+          value: hpi_pluton_admin
+          secret_namespace: homepi_secrets.vault
+          env:
+            - PLUTON_ADMIN_USERNAME
+            - TF_VAR_PLUTON_ADMIN_USERNAME
+        hpi_pluton_admin_password:
+          value: hpi_pluton_admin
+          secret_namespace: homepi_secrets.vault
+          env:
+            - PLUTON_ADMIN_PASSWORD
+            - TF_VAR_PLUTON_ADMIN_PASSWORD

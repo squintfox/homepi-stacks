@@ -87,6 +87,14 @@ resource "portainer_stack" "budget" {
     name  = "ACTUAL_API_PASSWORD"
     value = var.ACTUAL_API_PASSWORD
   }
+  env {
+    name  = "ACTUAL_OPENID_CLIENT_USERNAME"
+    value = var.ACTUAL_OPENID_CLIENT_USERNAME
+  }
+  env {
+    name  = "ACTUAL_OPENID_CLIENT_SECRET"
+    value = var.ACTUAL_OPENID_CLIENT_SECRET
+  }
 
   lifecycle {
     ignore_changes = [repository_reference_name]

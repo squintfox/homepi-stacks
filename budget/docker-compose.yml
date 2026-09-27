@@ -4,7 +4,16 @@ services:
     # ports:
     #   - '5006:5006'
     environment:
-      - ACTUAL_TOKEN_EXPIRATION=1800
+      - ACTUAL_TOKEN_EXPIRATION=3600
+      - ACTUAL_LOGIN_METHOD=openid
+      - ACTUAL_ALLOWED_LOGIN_METHODS=password,openid
+      - ACTUAL_OPENID_DISCOVERY_URL=https://auth.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/realms/master/.well-known/openid-configuration
+      - ACTUAL_OPENID_CLIENT_ID=${ACTUAL_OPENID_CLIENT_USERNAME}
+      - ACTUAL_OPENID_CLIENT_SECRET=${ACTUAL_OPENID_CLIENT_SECRET}
+      - ACTUAL_OPENID_SERVER_HOSTNAME=https://budget.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
+      - ACTUAL_OPENID_AUTH_METHOD=openid
+      - ACTUAL_OPENID_ENFORCE=false
+      - ACTUAL_USER_CREATION_MODE=manual
       # - ACTUAL_HTTPS_KEY=/data/selfhost.key
       # - ACTUAL_HTTPS_CERT=/data/selfhost.crt
       # - ACTUAL_PORT=5006

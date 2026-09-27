@@ -1,34 +1,29 @@
 services:
-  authelia:
-    image: authelia/authelia:latest
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev
     environment:
       - TZ=${HPI_TIME_ZONE}
-      - AUTHELIA_THEME=auto
-      - AUTHELIA_LOG_LEVEL=info
-      - AUTHELIA_SERVER_ADDRESS=tcp://0.0.0.0:9091
-      - AUTHELIA_AUTHENTICATION_BACKEND_FILE_PATH=/config/users_database.yml
-      - AUTHELIA_SESSION_SECRET=${HPI_AUTH_SESSION_SECRET}
-      - AUTHELIA_SESSION_COOKIES_0_DOMAIN=${HPI_DNS_DOMAIN}
-      - AUTHELIA_SESSION_COOKIES_0_AUTHELIA_URL=https://auth.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
-      - AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET=${HPI_AUTH_JWT_SECRET}
-      - AUTHELIA_STORAGE_ENCRYPTION_KEY=${HPI_AUTH_STORAGE_ENCRYPTION_KEY}
-      - AUTHELIA_STORAGE_LOCAL_PATH=/config/db.sqlite3
-      - AUTHELIA_NOTIFIER_FILESYSTEM_FILENAME=/config/notification.txt
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=change-me-now
+      - KC_PROXY_HEADERS=xforwarded
+      - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME=https://auth.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
     volumes:
-      - ${HPI_LOCAL_DATA_PATH}/authelia:/config
+      - ${HPI_LOCAL_DATA_PATH}/keycloak:/opt/keycloak/data
     networks:
       - webproxy-backend
     labels:
       caddy: auth.${HPI_DNS_DOMAIN}
-      caddy.reverse_proxy: "{{upstreams 9091}}"
+      caddy.reverse_proxy: "{{upstreams 8080}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
     deploy:
       labels:
-        - homepage.group=Tools  
+        - homepage.group=Management  
         - homepage.name=Auth
-        - homepage.icon=sh-authelia
+        - homepage.icon=sh-keycloak
         - homepage.href=https://auth.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
 networks:

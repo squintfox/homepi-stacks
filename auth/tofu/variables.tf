@@ -28,15 +28,3 @@ variable "HPI_DESEC_TOKEN" {
 variable "HPI_TIME_ZONE" {
   type        = string
 }
-variable "HPI_AUTH_SESSION_SECRET" {
-  type        = string
-  sensitive   = true
-}
-variable "HPI_AUTH_JWT_SECRET" {
-  type        = string
-  sensitive   = true
-}
-variable "HPI_AUTH_STORAGE_ENCRYPTION_KEY" {
-  type        = string
-  sensitive   = true
-}

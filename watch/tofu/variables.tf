@@ -34,3 +34,6 @@ variable "HPI_APP_GID" {
 variable "HPI_TIME_ZONE" {
   type        = string
 }
+variable "HPI_LOCAL_IP_ADDRESS" {
+  type        = string
+}

@@ -1,0 +1,53 @@
+services:
+  pluton:
+    image: plutonhq/pluton:latest
+    networks:
+      - webproxy-backend
+    environment:
+      # ===== REQUIRED: Security & Authentication =====
+      # Generate secure random strings (min 12 characters each)
+      ENCRYPTION_KEY: ${PLUTON_ENCRYPTION_KEY} # Encryption key for restic/rclone Snapshot encryption
+      USER_NAME: ${PLUTON_ADMIN_USERNAME} # Admin username for login
+      USER_PASSWORD: ${PLUTON_ADMIN_PASSWORD} # Admin password for login
+
+      # ===== Application Settings =====
+      APP_TITLE: ${APP_TITLE:-Pluton}
+      APP_URL: "https://backup.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/"
+      SERVER_PORT: "5173"
+      MAX_CONCURRENT_BACKUPS: ${MAX_CONCURRENT_BACKUPS:-2}
+      SESSION_DURATION: ${SESSION_DURATION:-7} # How long frontend login Session lasts in Days
+
+      # ===== User Interface Security Settings =====
+      ALLOW_CUSTOM_RESTORE_PATH: ${ALLOW_CUSTOM_RESTORE_PATH:-true}
+      ALLOW_FILE_BROWSER: ${ALLOW_FILE_BROWSER:-true}
+      DISABLE_EVENT_SCRIPTS: ${DISABLE_EVENT_SCRIPTS:-false}
+
+      # ===== Docker-specific (do not change) =====
+      NODE_ENV: production
+      IS_DOCKER: "true"
+      
+      # configtool managed
+      USER_UID: ${HPI_APP_UID}
+      USER_GID: ${HPI_APP_GID}
+      # Portainer managed
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/pluton:/data
+    labels:
+      caddy: backup.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 5173}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    # ports:
+    #   - "${SERVER_PORT:-5173}:${SERVER_PORT:-5173}"
+    deploy:
+      labels:
+        - homepage.group=Tools  
+        - homepage.name=Backup
+        - homepage.icon=sh-pluton
+        - homepage.href=https://backup.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+
+networks:
+  webproxy-backend:
+    external: true

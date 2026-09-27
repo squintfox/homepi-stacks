@@ -15,7 +15,8 @@ services:
       - PLEX_GID=${HPI_APP_GID}
       - TZ=${HPI_TIME_ZONE}
       # - PLEX_CLAIM=  # Optional Plex claim token for automatic server association
-      - ADVERTISE_IP=https://plex.${HPI_DNS_DOMAIN}:32400
+      # unless you also add the http URL, Plex detects your LAN devices as remote (kind fo unclear why)
+      - ADVERTISE_IP=https://plex.${HPI_DNS_DOMAIN}:32400,http://${HPI_LOCAL_IP_ADDRESS}:32401
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/plex/config:/config
       - ${HPI_LOCAL_DATA_PATH}/plex/transcode:/transcode
