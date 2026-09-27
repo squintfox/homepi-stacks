@@ -28,7 +28,7 @@ terraform {
 }
 
 provider "portainer" {
-  endpoint = "https://backup.${var.HPI_DNS_DOMAIN}:${var.HPI_HTTPS_PORT}"
+  endpoint = "https://manage.${var.HPI_DNS_DOMAIN}:${var.HPI_HTTPS_PORT}"
   api_key  = var.HPI_PORTAINER_TOKEN
 }
 
@@ -44,7 +44,7 @@ resource "portainer_stack" "backup" {
 
   repository_url            = var.HPI_STACKS_REPO_URL
   repository_reference_name = "refs/heads/release"
-  file_path_in_repository   = "git/docker-compose.yml"
+  file_path_in_repository   = "backup/docker-compose.yml"
 
   git_repository_authentication = false
   prune                         = true
