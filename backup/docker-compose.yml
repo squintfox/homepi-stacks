@@ -32,6 +32,9 @@ services:
       # Portainer managed
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/pluton:/data
+      - ${HPI_LOCAL_DATA_PATH}:/local-data
+      - homepi_stacks:/stacks
+      - homepi_repo:/homepi
     labels:
       caddy: backup.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 5173}}"
@@ -47,6 +50,13 @@ services:
         - homepage.icon=sh-pluton
         - homepage.href=https://backup.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
+volumes:
+  homepi_repo:
+    external: true
+    name: homepi_repo
+  homepi_stacks:
+    external: true
+    name: homepi_stacks
 
 networks:
   webproxy-backend:

@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Ensure required service data folders exist.
 STACK_NAME="git"
-SERVICE_FOLDERS="gitea/gitea gitea/postgres"
+SERVICE_FOLDERS="gitea/gitea gitea/postgres_db"
 
 for folder in $SERVICE_FOLDERS; do
 	echo "Creating folder: $folder..."
