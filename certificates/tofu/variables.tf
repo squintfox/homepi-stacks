@@ -28,3 +28,9 @@ variable "HPI_DESEC_TOKEN" {
 variable "HPI_PRIMARY_EMAIL" {
   type        = string
 }
+variable "HPI_APP_UID" {
+  type        = string
+}
+variable "HPI_APP_GID" {
+  type        = string
+}

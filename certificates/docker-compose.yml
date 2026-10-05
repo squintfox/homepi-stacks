@@ -1,7 +1,9 @@
 services:
   acme-sh:
     image: neilpang/acme.sh:latest
+    user: "${HPI_APP_UID}:${HPI_APP_GID}"
     environment:
+      - HOME=/acme.sh
       - DEDYN_TOKEN=${HPI_DESEC_TOKEN}
       - LE_EMAIL=${HPI_PRIMARY_EMAIL}
       - LE_DNS_SLEEP=120
@@ -23,7 +25,7 @@ services:
       DOMAIN_LIST_FILE="/run/config/certificates_acme_domain_list"
       # letsencrypt_test for staging, letsencrypt for production
       acme.sh --set-default-ca --server letsencrypt
-      acme.sh --register-account -m "$${LE_EMAIL}"s
+      acme.sh --register-account -m "$${LE_EMAIL}"
       [ -f "$${DOMAIN_LIST_FILE}" ]
 
       while IFS= read -r domain || [ -n "$${domain}" ]; do

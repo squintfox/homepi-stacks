@@ -37,6 +37,8 @@ services:
     configs:
       - source: semaphore_requirements
         target: /etc/semaphore/requirements.txt
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}:/local-data
     networks:
       - webproxy-backend
     labels:

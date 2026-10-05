@@ -69,6 +69,14 @@ resource "portainer_stack" "certificates" {
     name  = "HPI_PRIMARY_EMAIL"
     value = var.HPI_PRIMARY_EMAIL
   }
+  env {
+    name  = "HPI_APP_UID"
+    value = var.HPI_APP_UID
+  }
+  env {
+    name  = "HPI_APP_GID"
+    value = var.HPI_APP_GID
+  }
 
   lifecycle {
     ignore_changes = [repository_reference_name]
