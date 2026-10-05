@@ -20,4 +20,11 @@ variable "HPI_TFSTATE_PASSPHRASE" {
   sensitive   = true
 }
 
-# /required
+variable "HPI_TAILSCALE_AUTHKEY" {
+  type        = string
+  sensitive   = true
+}
+
+variable "HPI_SUBNET" {
+  type = string
+}

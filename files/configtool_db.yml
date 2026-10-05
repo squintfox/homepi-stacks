@@ -1,0 +1,14 @@
+homepi:
+  environments:
+    base:
+      - files.default
+
+  config:
+    files:
+      default:
+        hpi_filebrowser_admin_password:
+          value: hpi_filebrowser_admin
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_FILEBROWSER_ADMIN_PASSWORD
+            - TF_VAR_HPI_FILEBROWSER_ADMIN_PASSWORD

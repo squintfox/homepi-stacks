@@ -36,18 +36,23 @@ data "portainer_environment" "swarm" {
   name = "local-swarm"
 }
 
-resource "portainer_stack" "backup" {
-  name            = "backup"
+# EDIT: 
+resource "portainer_stack" "files" {
+  # EDIT: 
+  name            = "files"
   deployment_type = "swarm"
   method          = "repository"
   endpoint_id     = data.portainer_environment.swarm.id
 
   repository_url            = var.HPI_STACKS_REPO_URL
   repository_reference_name = "refs/heads/release"
-  file_path_in_repository   = "backup/docker-compose.yml"
+  # EDIT: 
+  file_path_in_repository   = "files/docker-compose.yml"
 
   git_repository_authentication = false
   prune                         = true
+
+  # EDIT: 
 
   env {
     name  = "HPI_LOCAL_DATA_PATH"
@@ -61,34 +66,16 @@ resource "portainer_stack" "backup" {
     name  = "HPI_HTTPS_PORT"
     value = var.HPI_HTTPS_PORT
   }
+
   env {
     name  = "HPI_DESEC_TOKEN"
     value = var.HPI_DESEC_TOKEN
   }
   env {
-    name  = "HPI_APP_UID"
-    value = var.HPI_APP_UID
+    name  = "HPI_FILEBROWSER_ADMIN_PASSWORD"
+    value = var.HPI_FILEBROWSER_ADMIN_PASSWORD
   }
-  env {
-    name  = "HPI_APP_GID"
-    value = var.HPI_APP_GID
-  }
-  env {
-    name  = "HPI_TIME_ZONE"
-    value = var.HPI_TIME_ZONE
-  }
-  env {
-    name  = "PLUTON_ENCRYPTION_KEY"
-    value = var.PLUTON_ENCRYPTION_KEY
-  }
-  env {
-    name  = "PLUTON_ADMIN_USERNAME"
-    value = var.PLUTON_ADMIN_USERNAME
-  }
-  env {
-    name  = "PLUTON_ADMIN_PASSWORD"
-    value = var.PLUTON_ADMIN_PASSWORD
-  }
+
   lifecycle {
     ignore_changes = [repository_reference_name]
   }

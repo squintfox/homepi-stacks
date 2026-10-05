@@ -1,0 +1,16 @@
+services:
+  tailscale:
+    image: tailscale/tailscale:latest
+    environment:
+      TS_AUTHKEY: ${HPI_TAILSCALE_AUTHKEY}
+      TS_HOSTNAME: homepi
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_ACCEPT_DNS: "true"
+      TS_ROUTES: ${HPI_SUBNET}
+      # Swarm can't grant /dev/net/tun or NET_ADMIN, so run in userspace mode
+      TS_USERSPACE: "true"
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/tailscale:/var/lib/tailscale
+    deploy:
+      restart_policy:
+        condition: any

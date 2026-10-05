@@ -1,0 +1,22 @@
+server:
+  cacheDir: /home/filebrowser/data/tmp # using the data volume so it can persist across restarts
+  sources:
+    - path: /local-data # Do not use a root "/" directory or include the "/var" folder
+      config:
+        defaultEnabled: true    
+  # numImageProcessors: 4
+
+integrations:
+  media:
+    # ffmpegPath: "/usr/local/bin"  # set in env var
+    debug: false
+    extractEmbeddedSubtitles: true  # Enable subtitle extraction
+    # convert:
+    #   imagePreview:
+    #     heic: true  # Enable HEIC conversion
+    #   videoPreview:
+    #     mp4: true
+    #     mkv: true
+    #     avi: true
+    #     mov: true
+    #     webm: true

@@ -1,0 +1,27 @@
+services:
+  filebrowser:
+    image: ghcr.io/gtsteffaniak/filebrowser:stable
+    environment:
+      FILEBROWSER_ADMIN_PASSWORD: ${HPI_FILEBROWSER_ADMIN_PASSWORD}
+      FILEBROWSER_FFMPEG_PATH: "/usr/local/bin"
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/filebrowser:/home/filebrowser/data
+      - ${HPI_LOCAL_DATA_PATH}:/local-data
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: files.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        homepage.group: Tools
+        homepage.name: Filebrowser
+        homepage.icon: mdi-folder
+        homepage.href: https://files.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+networks:
+  webproxy-backend:
+    external: true

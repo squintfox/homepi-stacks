@@ -1,0 +1,14 @@
+homepi:
+  environments:
+    base:
+      - remote-access.default
+
+  config:
+    remote-access:
+      default:
+        hpi_tailscale_authkey:
+          value: hpi_tailscale_authkey
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_TAILSCALE_AUTHKEY
+            - TF_VAR_HPI_TAILSCALE_AUTHKEY

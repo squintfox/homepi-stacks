@@ -37,12 +37,6 @@ services:
     configs:
       - source: semaphore_requirements
         target: /etc/semaphore/requirements.txt
-    volumes:
-      - type: volume
-        source: local_nfs
-        target: /mnt/nfsshare
-        volume:
-          nocopy: true
     networks:
       - webproxy-backend
     labels:
@@ -65,8 +59,3 @@ networks:
 configs:
   semaphore_requirements:
     file: ./files/requirements.txt
-
-volumes:
-  local_nfs:
-    external: true
-    name: local_nfs

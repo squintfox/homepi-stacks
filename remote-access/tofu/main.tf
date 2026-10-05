@@ -37,9 +37,9 @@ data "portainer_environment" "swarm" {
 }
 
 # EDIT: 
-resource "portainer_stack" "tools" {
+resource "portainer_stack" "remote-access" {
   # EDIT: 
-  name            = "file-server"
+  name            = "remote-access"
   deployment_type = "swarm"
   method          = "repository"
   endpoint_id     = data.portainer_environment.swarm.id
@@ -47,10 +47,12 @@ resource "portainer_stack" "tools" {
   repository_url            = var.HPI_STACKS_REPO_URL
   repository_reference_name = "refs/heads/release"
   # EDIT: 
-  file_path_in_repository   = "file-server/docker-compose.yml"
+  file_path_in_repository   = "remote-access/docker-compose.yml"
 
   git_repository_authentication = false
   prune                         = true
+
+  # EDIT: 
 
   env {
     name  = "HPI_LOCAL_DATA_PATH"
@@ -65,7 +67,14 @@ resource "portainer_stack" "tools" {
     value = var.HPI_HTTPS_PORT
   }
 
-  # /required
+  env {
+    name  = "HPI_TAILSCALE_AUTHKEY"
+    value = var.HPI_TAILSCALE_AUTHKEY
+  }
+  env {
+    name  = "HPI_SUBNET"
+    value = var.HPI_SUBNET
+  }
 
   lifecycle {
     ignore_changes = [repository_reference_name]
