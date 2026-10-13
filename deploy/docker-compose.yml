@@ -11,7 +11,7 @@ services:
       - webproxy-backend
 
   semaphore:
-    image: semaphoreui/semaphore:latest
+    image: semaphoreui/semaphore:v2.19.16  # TODO: latest went backwards from 2.19 to 2.18
     environment:
       SEMAPHORE_DB_DIALECT: postgres
       SEMAPHORE_DB_HOST: semaphore-db
