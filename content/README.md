@@ -1,0 +1,29 @@
+# setup
+
+- log into and set up u/p
+    - Lidarr (Music)
+    - Bazarr (Subtitles)
+    - Prowlarr (Indexer)
+- For whisparr, get the admin pw from the logs
+- For qbittorrent, also get from logs
+- qbittorrent
+    - Settings > WebUI > password and api key
+- Lidarr
+    - Settings > General > API Key
+- Prowlarr
+    - Settings > Apps > Add Lidarr
+    - Settings > Indexers > Indexer proxies
+        - Tags > cloudflare
+    - Add Indexer, if captcha required, use tag cloudflare
+    - Settings > add download clients > qbittorrent
+- Whisparr
+    - Settings > add download clients > qbittorrent (host `qbittorrent`, provided by the `torrent` stack)
+- SABnzbd
+    - Settings > General > Security > password and api key
+    - Settings > General > Switches
+        - Launch Browser on Startup: disable
+    - Need to add categories to connect prowlarr/whisparr
+    - https://trash-guides.info/Downloaders/SABnzbd/Basic-Setup/
+- qbittorrent
+    - https://trash-guides.info/Downloaders/qBittorrent
+- 

@@ -1,0 +1,38 @@
+homepi:
+  environments:
+    base:
+      - content.default
+
+  config:
+    content:
+      default:
+        hpi_radarr_apikey:
+          value: hpi_radarr_apikey
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_RADARR_APIKEY
+            - TF_VAR_HPI_RADARR_APIKEY
+        hpi_sonarr_apikey:
+          value: hpi_sonarr_apikey
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_SONARR_APIKEY
+            - TF_VAR_HPI_SONARR_APIKEY
+        hpi_lidarr_apikey:
+          value: hpi_lidarr_apikey
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_LIDARR_APIKEY
+            - TF_VAR_HPI_LIDARR_APIKEY
+        hpi_whisparr_apikey:
+          value: hpi_whisparr_apikey
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_WHISPARR_APIKEY
+            - TF_VAR_HPI_WHISPARR_APIKEY
+        hpi_prowlarr_apikey:
+          value: hpi_prowlarr_apikey
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_PROWLARR_APIKEY
+            - TF_VAR_HPI_PROWLARR_APIKEY

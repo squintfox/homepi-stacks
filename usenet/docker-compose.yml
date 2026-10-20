@@ -1,0 +1,53 @@
+# Standalone Compose stack (NOT Swarm): relies on network_mode, cap_add and devices.
+# The webproxy-backend network must be attachable.
+services:
+  gluetun:  # VPN Client
+    image: qmcgaw/gluetun:latest
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TZ=${HPI_TIME_ZONE}
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${HPI_PROTONVPN_PRIVATE_KEY}
+      - SERVER_COUNTRIES=United States
+      - FREE_ONLY=off
+      - VPN_PORT_FORWARDING=off  # don't need for usenet
+      - FIREWALL_INPUT_PORTS=8080
+    networks:
+      webproxy-backend:
+        aliases:
+          - sabnzbd
+    labels:
+      caddy: content-usenet.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 8080}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      homepage.group: Content
+      homepage.name: Usenet
+      homepage.icon: sh-sabnzbd
+      homepage.href: https://content-usenet.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+  sabnzbd:  # Usenet Client
+    image: lscr.io/linuxserver/sabnzbd:latest
+    restart: unless-stopped
+    environment:
+      - PUID=${HPI_APP_UID}
+      - PGID=${HPI_APP_GID}
+      - UMASK=002
+      - TZ=${HPI_TIME_ZONE}
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/sabnzbd:/config
+      - ${HPI_LOCAL_DATA_PATH}/share/usenet:/data/usenet
+    network_mode: service:gluetun
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+networks:
+  webproxy-backend:
+    external: true

@@ -1,0 +1,14 @@
+homepi:
+  environments:
+    base:
+      - usenet.default
+
+  config:
+    usenet:
+      default:
+        hpi_protonvpn_private_key:
+          value: hpi_protonvpn_private_key
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_PROTONVPN_PRIVATE_KEY
+            - TF_VAR_HPI_PROTONVPN_PRIVATE_KEY

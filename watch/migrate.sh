@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Ensure required service data folders exist.
 STACK_NAME="watch"
-SERVICE_FOLDERS="plex/config plex/transcode plex/media"
+SERVICE_FOLDERS="plex/config plex/transcode plex/media jellyfin/config jellyfin/cache share/media"
 
 for folder in $SERVICE_FOLDERS; do
 	echo "Creating folder: $folder..."

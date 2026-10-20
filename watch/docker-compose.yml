@@ -14,17 +14,18 @@ services:
       - PLEX_UID=${HPI_APP_UID}
       - PLEX_GID=${HPI_APP_GID}
       - TZ=${HPI_TIME_ZONE}
-      # - PLEX_CLAIM=  # Optional Plex claim token for automatic server association
-      # unless you also add the http URL, Plex detects your LAN devices as remote (kind fo unclear why)
-      - ADVERTISE_IP=https://watch.${HPI_DNS_DOMAIN}:32400,http://${HPI_LOCAL_IP_ADDRESS}:32401
+      # https://www.plex.tv/claim
+      - PLEX_CLAIM=${HPI_PLEX_CLAIM-""}  # you need this the first time to link the server to your account
+      # unless you also add the http URL, Plex detects your LAN devices as remote (kind of unclear why)
+      - ADVERTISE_IP=https://watch-v1.${HPI_DNS_DOMAIN}:32400,http://${HPI_LOCAL_IP_ADDRESS}:32401
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/plex/config:/config
       - ${HPI_LOCAL_DATA_PATH}/plex/transcode:/transcode
-      - ${HPI_LOCAL_DATA_PATH}/plex/media:/plex-media
+      - ${HPI_LOCAL_DATA_PATH}/share/media:/data
     networks:
       - webproxy-backend
     labels:
-      caddy: watch.${HPI_DNS_DOMAIN}:32400
+      caddy: watch-v1.${HPI_DNS_DOMAIN}:32400
       caddy.reverse_proxy: "{{upstreams 32400}}"
       caddy.reverse_proxy.flush_interval: -1
       caddy.tls.propagation_delay: 120s
@@ -35,7 +36,45 @@ services:
         - homepage.group=Home  
         - homepage.name=Watch  
         - homepage.icon=sh-plex
-        - homepage.href=https://watch.${HPI_DNS_DOMAIN}:32400/
+        - homepage.href=https://watch-v1.${HPI_DNS_DOMAIN}:32400/
+
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    user: ${HPI_APP_UID}:${HPI_APP_GID}
+    ports:
+      # - 8096:8096/tcp
+      - 7359:7359/udp
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/jellyfin/config:/config
+      - ${HPI_LOCAL_DATA_PATH}/jellyfin/cache:/cache
+      - ${HPI_LOCAL_DATA_PATH}/share/media:/data
+      # - type: bind
+      #   source: ${HPI_LOCAL_DATA_PATH}/jellyfin/media2
+      #   target: /media2
+      #   read_only: true
+      # # Optional - extra fonts to be used during transcoding with subtitle burn-in
+      # - type: bind
+      #   source: ${HPI_LOCAL_DATA_PATH}/jellyfin/fonts
+      #   target: /usr/local/share/fonts/custom
+      #   read_only: true
+    # Optional - alternative address used for autodiscovery
+    environment:
+      - JELLYFIN_PublishedServerUrl=https://watch-v2.${HPI_DNS_DOMAIN}:8920/ 
+    networks:
+      - webproxy-backend
+    labels:
+      caddy: watch-v2.${HPI_DNS_DOMAIN}:8920
+      caddy.reverse_proxy: "{{upstreams 8096}}"
+      caddy.reverse_proxy.flush_interval: -1
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        - homepage.group=Home  
+        - homepage.name=Watch  
+        - homepage.icon=sh-jellyfin
+        - homepage.href=https://watch-v2.${HPI_DNS_DOMAIN}:8920/
 
 networks:
   webproxy-backend:

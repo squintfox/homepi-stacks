@@ -1,0 +1,113 @@
+# Standalone Compose stack (NOT Swarm): relies on network_mode, cap_add and devices.
+# The webproxy-backend network must be attachable.
+services:
+  gluetun: # VPN Client
+    image: qmcgaw/gluetun:latest
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TZ=${HPI_TIME_ZONE}
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${HPI_PROTONVPN_PRIVATE_KEY}
+      - SERVER_COUNTRIES=United States
+      - FREE_ONLY=off
+      - PORT_FORWARD_ONLY=on
+      - VPN_PORT_FORWARDING=on
+      - >-
+        HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE={
+          "auth":"apikey",
+          "apikey":"${HPI_GLUETUN_APIKEY}",
+          "routes":[
+            "GET /v1/portforward",
+            "GET /v1/openvpn/portforwarded"
+          ]
+        }
+    ports:
+      # - "8080:8080"
+      - "6881:6881"
+      - "6881:6881/udp"
+    networks:
+      webproxy-backend:
+        # qbittorrent shares this container's network, so the arr apps reach it via this alias
+        aliases:
+          - qbittorrent
+    labels:
+      caddy: content-torrent.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 8080}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      homepage.group: Content
+      homepage.name: Torrents
+      homepage.icon: sh-qbittorrent
+      homepage.href: https://content-torrent.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+  qbittorrent: # Torrent Client
+    image: lscr.io/linuxserver/qbittorrent:latest
+    environment:
+      - PUID=${HPI_APP_UID}
+      - PGID=${HPI_APP_GID}
+      - UMASK=002
+      - TZ=${HPI_TIME_ZONE}
+      - WEBUI_PORT=8080
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/qbittorrent:/config
+      - ${HPI_LOCAL_DATA_PATH}/share/torrents:/data/torrents
+    network_mode: service:gluetun
+    # ports:
+    #   - "8080:8080"
+    #   - "6881:6881"
+    #   - "6881:6881/udp"``
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+  qbittorrent-port-update:
+    image: technosam/qbittorrent-gluetun-port-update:latest
+    restart: unless-stopped
+    network_mode: service:gluetun
+    environment:
+      - QBITTORRENT_WEBUI_HOST=qbittorrent
+      - QBITTORRENT_WEBUI_PORT=8080
+      - QBITTORRENT_WEBUI_API_KEY=${HPI_QBITTORRENT_APIKEY}
+      - GLUETUN_CONTROL_API_KEY=${HPI_GLUETUN_APIKEY}
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+  qbittorrent-ui:
+    image: ghcr.io/autobrr/qui:latest
+    restart: unless-stopped
+    environment:
+      - PUID=${HPI_APP_UID}
+      - PGID=${HPI_APP_GID}
+      - UMASK=002
+    # ports:
+    #   - "7476:7476"
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/qui:/config
+      # mount torrent path for local filesystem access
+      - ${HPI_LOCAL_DATA_PATH}/share/torrents:/data/torrents
+    networks:
+      - webproxy-backend
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    labels:
+      caddy: content-torrent-qui.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 7476}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      homepage.group: Content
+      homepage.name: Torrents (Alt UI)
+      homepage.icon: sh-qui
+      homepage.href: https://content-torrent-qui.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+networks:
+  webproxy-backend:
+    external: true

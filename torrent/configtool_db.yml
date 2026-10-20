@@ -1,0 +1,26 @@
+homepi:
+  environments:
+    base:
+      - torrent.default
+
+  config:
+    torrent:
+      default:
+        hpi_protonvpn_private_key:
+          value: hpi_protonvpn_private_key
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_PROTONVPN_PRIVATE_KEY
+            - TF_VAR_HPI_PROTONVPN_PRIVATE_KEY
+        hpi_gluetun_apikey:
+          value: hpi_gluetun_apikey
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_GLUETUN_APIKEY
+            - TF_VAR_HPI_GLUETUN_APIKEY
+        hpi_qbittorrent_apikey:
+          value: hpi_qbittorrent_apikey
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_QBITTORRENT_APIKEY
+            - TF_VAR_HPI_QBITTORRENT_APIKEY

@@ -1,0 +1,35 @@
+[project]
+name = "homepi-stacks-content"
+authors = [{ name = "Robert Spadaro", email = "robertjspadaro@gmail.com" }]
+description = "HomePi Stacks Content"
+readme = "README.md"
+version = "0.1.0"
+
+[dependency-groups]
+dev = ["black>=24.10.0", "isort>=5.13.2", "pre-commit>=4.0.1", "ruff>=0.9.0"]
+
+[tool.black]
+line-length = 92
+target-version = ['py312', 'py313']
+skip-string-normalization = true
+
+[tool.isort]
+profile = 'black'
+line_length = 92
+
+[tool.ruff]
+line-length = 92
+
+[tool.ruff.lint]
+ignore = [
+    'I001',   # import block is un-sorted or un-formatted (using isort)
+    'TRY002', # create your own exception classes
+    'BLE001', # don't catch blind exception
+    'RUF010', # conversion flag (I don't like this syntax)
+    'SIM114', # Collapse if/elif branches that have identical bodies
+    'EXE002', # executable bit set on a non-script file
+    #   'F403',   # wildcard import
+    #   'F405',   # wildcard name undefined
+    #   'E722',   # do not use bare 'except'
+    #   'SIM115', # open files without using a context manager (use 'with' statement)
+]
