@@ -1,6 +1,8 @@
 services:
   pluton:
     image: plutonhq/pluton:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     networks:
       - webproxy-backend
     environment:
@@ -12,7 +14,7 @@ services:
 
       # ===== Application Settings =====
       APP_TITLE: ${APP_TITLE:-Pluton}
-      APP_URL: "https://backup.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/"
+      APP_URL: "https://backup${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/"
       SERVER_PORT: "5173"
       MAX_CONCURRENT_BACKUPS: ${MAX_CONCURRENT_BACKUPS:-2}
       SESSION_DURATION: ${SESSION_DURATION:-7} # How long frontend login Session lasts in Days
@@ -38,7 +40,7 @@ services:
       - homepi_stacks:/stacks
       - homepi_repo:/homepi
     labels:
-      caddy: backup.${HPI_DNS_DOMAIN}
+      caddy: backup${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 5173}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
@@ -50,7 +52,7 @@ services:
         - homepage.group=Tools  
         - homepage.name=Backup
         - homepage.icon=sh-pluton
-        - homepage.href=https://backup.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        - homepage.href=https://backup${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
 volumes:
   homepi_repo:

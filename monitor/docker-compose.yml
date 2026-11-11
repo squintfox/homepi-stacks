@@ -1,6 +1,8 @@
 services:
   beszel:
     image: henrygd/beszel
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/beszel/data:/beszel_data
       - ${HPI_LOCAL_DATA_PATH}/beszel/socket:/beszel_socket
@@ -9,7 +11,7 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: monitoring.${HPI_DNS_DOMAIN}
+      caddy: monitoring${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 8090}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
@@ -19,10 +21,12 @@ services:
         homepage.group: Monitoring  
         homepage.name: Monitor  
         homepage.icon: sh-beszel
-        homepage.href: https://monitoring.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        homepage.href: https://monitoring${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   beszel-agent:
     image: henrygd/beszel-agent
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     network_mode: host
     volumes:
       # trying to use the docker proxy didn't work completely, networking wasn't working
@@ -37,6 +41,8 @@ services:
 
   speedtest-tracker:
     image: linuxserver/speedtest-tracker:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     # ports:
     #   - 8080:80
     #   - 8443:443
@@ -53,11 +59,11 @@ services:
       - DB_HOST=speedtest-db
       - DB_PORT=5432
       - DB_DATABASE=${SPEEDTEST_DB_DATABASE}
-      - APP_URL=https://speedtest.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
-      - ASSET_URL=https://speedtest.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
+      - APP_URL=https://speedtest${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
+      - ASSET_URL=https://speedtest${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
       - MAIL_MAILER=smtp
-      - MAIL_HOST=relay.${HPI_DNS_DOMAIN}
-      - MAIL_PORT=25
+      - MAIL_HOST=notify${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
+      - MAIL_PORT=8025
       - MAIL_USERNAME=null
       - MAIL_PASSWORD=null
       - MAIL_FROM_ADDRESS="speedtest@${HPI_DNS_DOMAIN}"
@@ -67,13 +73,14 @@ services:
       - SPEEDTEST_SERVERS=57682, 14236, 43201 # this one sucked, but maybe that was real?  56370
       - SPEEDTEST_PRUNE_RESULTS_OLDER_THAN=0
       - PUBLIC_DASHBOARD='true'
+      - LOG_LEVEL=INFO
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/speedtest/config:/config
     # - /path/to-custom-ssl-keys:/config/keys
     networks:
       - webproxy-backend
     labels:
-      caddy: speedtest.${HPI_DNS_DOMAIN}
+      caddy: speedtest${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 80}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
@@ -83,10 +90,12 @@ services:
         homepage.group: Monitoring  
         homepage.name: Speedtest  
         homepage.icon: sh-speedtest-tracker
-        homepage.href: https://speedtest.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        homepage.href: https://speedtest${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   speedtest-db:
     image: postgres:18
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       POSTGRES_DB: ${SPEEDTEST_DB_DATABASE}
       # VAULT
@@ -97,6 +106,32 @@ services:
     networks:
       - webproxy-backend
 
+  loggifly:
+    image: ghcr.io/clemcer/loggifly:v2
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
+    user: ${HPI_APP_UID}:${HPI_APP_GID}
+    read_only: true
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/loggifly/config:/config
+    networks:
+      - webproxy-backend
+    environment:
+      TZ: ${HPI_TIME_ZONE}
+      DOCKER_HOST: tcp://dockerproxy:2375
+      LOG_LEVEL: INFO
+      NTFY_URL: https://notify${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
+      NTFY_TOPIC: "homepi"
+      # NTFY_TOKEN: ${HPI_LOGGIFLY_NTFY_TOKEN}
+      # APPRISE_URL: "discord://..."        # Apprise-compatible URL
+      # CONTAINERS: "vaultwarden,audiobookshelf"   # comma-separated container names to monitor
+      CONTAINERS_CONTAINER_EVENTS: "die,crash,unhealthy,oom,kill"
+      SWARM_CONTAINER_EVENTS: "die,crash,unhealthy,oom,kill"
+      # keywords applied to all monitored containers
+      GLOBAL_KEYWORDS: "error,failed,exception,fatal,connection refused,out of memory,permission denied,authentication failed"
+      MERGE_MATCHES: "true"
+
 networks:
   webproxy-backend:
     external: true
+

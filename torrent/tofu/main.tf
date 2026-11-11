@@ -28,20 +28,20 @@ terraform {
 }
 
 provider "portainer" {
-  endpoint = "https://manage.${var.HPI_DNS_DOMAIN}:${var.HPI_HTTPS_PORT}"
+  endpoint = "https://manage${var.HPI_HOSTNAME_SUFFIX}.${var.HPI_DNS_DOMAIN}:${var.HPI_HTTPS_PORT}"
   api_key  = var.HPI_PORTAINER_TOKEN
 }
 
-# Standalone Docker environment pointing at the swarm node (needed for network_mode/cap_add/devices)
-data "portainer_environment" "standalone" {
-  name = "local-standalone"
+data "portainer_environment" "swarm" {
+  name = "local-swarm"
 }
 
+# Standalone Docker stack pointing at the swarm node (needed for network_mode/cap_add/devices)
 resource "portainer_stack" "torrent" {
   name            = "torrent"
   deployment_type = "standalone"
   method          = "repository"
-  endpoint_id     = data.portainer_environment.standalone.id
+  endpoint_id     = data.portainer_environment.swarm.id
 
   repository_url            = var.HPI_STACKS_REPO_URL
   repository_reference_name = "refs/heads/release"
@@ -59,8 +59,16 @@ resource "portainer_stack" "torrent" {
     value = var.HPI_DNS_DOMAIN
   }
   env {
+    name  = "HPI_HOSTNAME_SUFFIX"
+    value = var.HPI_HOSTNAME_SUFFIX
+  }
+  env {
     name  = "HPI_HTTPS_PORT"
     value = var.HPI_HTTPS_PORT
+  }
+  env {
+    name  = "HPI_LOCAL_IP_ADDRESS"
+    value = var.HPI_LOCAL_IP_ADDRESS
   }
   env {
     name  = "HPI_DESEC_TOKEN"

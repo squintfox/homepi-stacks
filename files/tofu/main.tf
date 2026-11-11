@@ -28,7 +28,7 @@ terraform {
 }
 
 provider "portainer" {
-  endpoint = "https://manage.${var.HPI_DNS_DOMAIN}:${var.HPI_HTTPS_PORT}"
+  endpoint = "https://manage${var.HPI_HOSTNAME_SUFFIX}.${var.HPI_DNS_DOMAIN}:${var.HPI_HTTPS_PORT}"
   api_key  = var.HPI_PORTAINER_TOKEN
 }
 
@@ -63,8 +63,16 @@ resource "portainer_stack" "files" {
     value = var.HPI_DNS_DOMAIN
   }
   env {
+    name  = "HPI_HOSTNAME_SUFFIX"
+    value = var.HPI_HOSTNAME_SUFFIX
+  }
+  env {
     name  = "HPI_HTTPS_PORT"
     value = var.HPI_HTTPS_PORT
+  }
+  env {
+    name  = "HPI_LOCAL_IP_ADDRESS"
+    value = var.HPI_LOCAL_IP_ADDRESS
   }
 
   env {
@@ -74,6 +82,14 @@ resource "portainer_stack" "files" {
   env {
     name  = "HPI_FILEBROWSER_ADMIN_PASSWORD"
     value = var.HPI_FILEBROWSER_ADMIN_PASSWORD
+  }
+  env {
+    name  = "HPI_APP_UID"
+    value = var.HPI_APP_UID
+  }
+  env {
+    name  = "HPI_APP_GID"
+    value = var.HPI_APP_GID
   }
 
   lifecycle {

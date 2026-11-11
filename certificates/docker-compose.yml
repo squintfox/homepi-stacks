@@ -62,8 +62,7 @@ services:
       '
     # cert issuance gets messed up when using the internal resolver
     dns:
-      - 1.1.1.1
-      - 1.0.0.1
+      - ${HPI_LOCAL_IP_ADDRESS}
     deploy:
       replicas: 0
       restart_policy:

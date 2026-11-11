@@ -1,3 +1,6 @@
+http:
+  port: 8080
+
 server:
   cacheDir: /home/filebrowser/data/tmp # using the data volume so it can persist across restarts
   sources:

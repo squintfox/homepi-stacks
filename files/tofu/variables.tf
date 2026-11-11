@@ -6,6 +6,9 @@ variable "HPI_PORTAINER_TOKEN" {
 variable "HPI_DNS_DOMAIN" {
   type        = string
 }
+variable "HPI_HOSTNAME_SUFFIX" {
+  type        = string
+}
 variable "HPI_HTTPS_PORT" {
   type        = string
 }
@@ -19,6 +22,9 @@ variable "HPI_TFSTATE_PASSPHRASE" {
   type        = string
   sensitive   = true
 }
+variable "HPI_LOCAL_IP_ADDRESS" {
+  type        = string
+}
 
 variable "HPI_DESEC_TOKEN" {
   type        = string
@@ -29,3 +35,10 @@ variable "HPI_FILEBROWSER_ADMIN_PASSWORD" {
   type        = string
   sensitive   = true
 }
+variable "HPI_APP_UID" {
+  type        = string
+}
+variable "HPI_APP_GID" {
+  type        = string
+}
+  

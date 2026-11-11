@@ -1,6 +1,8 @@
 services:
   tailscale:
     image: tailscale/tailscale:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       TS_AUTHKEY: ${HPI_TAILSCALE_AUTHKEY}
       TS_HOSTNAME: homepi
@@ -14,3 +16,4 @@ services:
     deploy:
       restart_policy:
         condition: any
+

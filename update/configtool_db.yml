@@ -1,12 +1,24 @@
 homepi:
   environments:
     base:
-      - shepherd.default
+      - update.default
 
   config:
-    shepherd:
+    update:
       default:
         # vaultwarden can have u and p for each item, postpend _username to get the username
+        hpi_whatsupdocker_username:
+          value: hpi_whatsupdocker
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_WHATSUPDOCKER_USERNAME
+            - TF_VAR_HPI_WHATSUPDOCKER_USERNAME
+        hpi_whatsupdocker_password:
+          value: hpi_whatsupdocker
+          secret_namespace: homepi_secrets.vault
+          env:
+            - HPI_WHATSUPDOCKER_PASSWORD
+            - TF_VAR_HPI_WHATSUPDOCKER_PASSWORD
         hpi_shepherd_registry_username:
           value: hpi_shepherd_registry
           secret_namespace: homepi_secrets.vault

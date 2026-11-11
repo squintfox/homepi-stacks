@@ -1,6 +1,8 @@
 services:
   snipe-it:
     image: snipe/snipe-it:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/snipe-it/storage:/var/lib/snipeit
       - ${HPI_LOCAL_DATA_PATH}/snipe-it/logs:/var/www/html/storage/logs
@@ -18,7 +20,7 @@ services:
       APP_PORT: 8000
       APP_ENV: production
       APP_DEBUG: "false"
-      APP_URL: https://assets.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
+      APP_URL: https://assets${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
       APP_TIMEZONE: ${HPI_TIME_ZONE}
       APP_LOCALE: en-US
       MAX_RESULTS: 500
@@ -39,8 +41,8 @@ services:
       DB_SSL_CA_PATH: null
       DB_SSL_CIPHER: null
       MAIL_MAILER: smtp
-      MAIL_HOST: relay.${HPI_DNS_DOMAIN}
-      MAIL_PORT: 25
+      MAIL_HOST: notify${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
+      MAIL_PORT: 8025
       MAIL_USERNAME: null
       MAIL_PASSWORD: null
       MAIL_TLS_VERIFY_PEER: "false"
@@ -119,20 +121,22 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: assets.${HPI_DNS_DOMAIN}
+      caddy: assets${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 80}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
     deploy:
       labels:
-        - homepage.group=Home  
+        - homepage.group=Home & Planning
         - homepage.name=Assets
         - homepage.icon=sh-snipe-it
-        - homepage.href=https://assets.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        - homepage.href=https://assets${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   snipe-db:
     image: mariadb:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/snipe-it/mysql_db:/var/lib/mysql
     environment:
@@ -144,15 +148,17 @@ services:
       - webproxy-backend
 
   snipe-mcp:
-    image: registry.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/snipe-mcp:latest
+    image: registry${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/snipe-mcp:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     user: "${HPI_APP_UID:-1000}:${HPI_APP_GID:-1000}"
     environment:
-      SNIPEIT_URL: https://assets.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+      SNIPEIT_URL: https://assets${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
       SNIPEIT_TOKEN: dummy_token  # needs to exist but has no effect
     networks:
       - webproxy-backend
     labels:
-      caddy: assets.${HPI_DNS_DOMAIN}
+      caddy: assets${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.handle_path: /mcp*
       caddy.handle_path.0_rewrite: "* /mcp"
       caddy.handle_path.1_reverse_proxy: http://snipe-mcp:8001
@@ -160,3 +166,4 @@ services:
 networks:
   webproxy-backend:
     external: true
+

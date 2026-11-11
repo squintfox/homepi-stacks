@@ -6,8 +6,9 @@ homepi:
   config:
     usenet:
       default:
+        # can't share keys betwen gluetun instances so the secret name changes
         hpi_protonvpn_private_key:
-          value: hpi_protonvpn_private_key
+          value: hpi_protonvpn_usenet_private_key
           secret_namespace: homepi_secrets.vault
           env:
             - HPI_PROTONVPN_PRIVATE_KEY

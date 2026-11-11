@@ -1,6 +1,8 @@
 services:
   zabbix-server:
     image: zabbix/zabbix-server-mysql:alpine-7.4-latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       # VAULT
       MYSQL_USER: ${ZABBIX_DB_USERNAME}
@@ -15,6 +17,8 @@ services:
 
   zabbix-web:
     image: zabbix/zabbix-web-nginx-mysql:alpine-7.4-latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       # VAULT
       MYSQL_USER: ${ZABBIX_DB_USERNAME}
@@ -28,7 +32,7 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: infra-monitoring.${HPI_DNS_DOMAIN}
+      caddy: infra-monitoring${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 8080}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
@@ -38,10 +42,12 @@ services:
         homepage.group: Monitoring 
         homepage.name: Infra Monitor
         homepage.icon: sh-zabbix
-        homepage.href: https://infra-monitoring.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        homepage.href: https://infra-monitoring${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   zabbix-agent2:
     image: zabbix/zabbix-agent2:alpine-7.4-latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       ZBX_SERVER_HOST: zabbix-server
       ZBX_SERVER_PORT: 10051
@@ -57,6 +63,8 @@ services:
 
   zabbix-db:
     image: mariadb:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/zabbix/mysql_db:/var/lib/mysql
     environment:
@@ -75,3 +83,4 @@ services:
 networks:
   webproxy-backend:
     external: true
+

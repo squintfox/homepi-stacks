@@ -1,16 +1,18 @@
 services:
   actual:
     image: actualbudget/actual-server:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     # ports:
     #   - '5006:5006'
     environment:
       - ACTUAL_TOKEN_EXPIRATION=3600
       - ACTUAL_LOGIN_METHOD=openid
       - ACTUAL_ALLOWED_LOGIN_METHODS=password,openid
-      - ACTUAL_OPENID_DISCOVERY_URL=https://auth.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/realms/master/.well-known/openid-configuration
+      - ACTUAL_OPENID_DISCOVERY_URL=https://auth${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/realms/master/.well-known/openid-configuration
       - ACTUAL_OPENID_CLIENT_ID=${ACTUAL_OPENID_CLIENT_USERNAME}
       - ACTUAL_OPENID_CLIENT_SECRET=${ACTUAL_OPENID_CLIENT_SECRET}
-      - ACTUAL_OPENID_SERVER_HOSTNAME=https://budget.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
+      - ACTUAL_OPENID_SERVER_HOSTNAME=https://budget${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
       - ACTUAL_OPENID_AUTH_METHOD=openid
       - ACTUAL_OPENID_ENFORCE=false
       - ACTUAL_USER_CREATION_MODE=manual
@@ -33,46 +35,48 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: budget.${HPI_DNS_DOMAIN}
+      caddy: budget${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 5006}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
     deploy:
       labels:
-        homepage.group: Finance
+        homepage.group: Money & Benefits
         homepage.name: Budget
         homepage.icon: sh-actual-budget
-        homepage.href: https://budget.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        homepage.href: https://budget${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
         # - homepage.description=
 
   api:
     image: jhonderson/actual-http-api:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       - PORT=5007
       # - ACTUAL_DATA_DIR=./data
-      - ACTUAL_SERVER_URL=https://budget.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+      - ACTUAL_SERVER_URL=https://budget${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
       - ACTUAL_SERVER_PASSWORD=${ACTUAL_BUDGET_PASSWORD}
       - API_KEY=${ACTUAL_API_PASSWORD}
     networks:
       - webproxy-backend
     labels:
-      caddy: budget-api.${HPI_DNS_DOMAIN}
+      caddy: budget-api${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 5007}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
     deploy:
       labels:
-        - homepage.group=Finance
+        - homepage.group=Money & Benefits
         - homepage.name=Budget API
         - homepage.icon=sh-swagger
-        - homepage.href=https://budget-api.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/api-docs/
+        - homepage.href=https://budget-api${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/api-docs/
 
   helper: &helper-base
     image: ghcr.io/psybers/actual-helpers:latest
     environment:
-      - ACTUAL_SERVER_URL=https://budget.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+      - ACTUAL_SERVER_URL=https://budget${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
       - ACTUAL_SERVER_PASSWORD=${ACTUAL_BUDGET_PASSWORD}
       - ACTUAL_SYNC_ID=${ACTUAL_BUDGET_SYNC_ID}
       # # do not allow self-signed SSL certs
@@ -160,3 +164,4 @@ services:
 networks:
   webproxy-backend:
     external: true
+

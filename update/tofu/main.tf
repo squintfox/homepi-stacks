@@ -28,7 +28,7 @@ terraform {
 }
 
 provider "portainer" {
-  endpoint = "https://manage.${var.HPI_DNS_DOMAIN}:${var.HPI_HTTPS_PORT}"
+  endpoint = "https://manage${var.HPI_HOSTNAME_SUFFIX}.${var.HPI_DNS_DOMAIN}:${var.HPI_HTTPS_PORT}"
   api_key  = var.HPI_PORTAINER_TOKEN
 }
 
@@ -52,8 +52,47 @@ resource "portainer_stack" "update" {
   prune                         = true
 
   env {
+    name  = "HPI_LOCAL_DATA_PATH"
+    value = var.HPI_LOCAL_DATA_PATH
+  }
+  env {
+    name  = "HPI_DNS_DOMAIN"
+    value = var.HPI_DNS_DOMAIN
+  }
+  env {
+    name  = "HPI_HOSTNAME_SUFFIX"
+    value = var.HPI_HOSTNAME_SUFFIX
+  }
+  env {
+    name  = "HPI_HTTPS_PORT"
+    value = var.HPI_HTTPS_PORT
+  }
+  env {
+    name  = "HPI_LOCAL_IP_ADDRESS"
+    value = var.HPI_LOCAL_IP_ADDRESS
+  }
+
+  # /required
+
+  env {
+    name  = "HPI_DESEC_TOKEN"
+    value = var.HPI_DESEC_TOKEN
+  }
+  env {
     name  = "HPI_TIME_ZONE"
     value = var.HPI_TIME_ZONE
+  }
+  env {
+    name  = "HPI_PRIMARY_EMAIL"
+    value = var.HPI_PRIMARY_EMAIL
+  }
+  env {
+    name  = "HPI_WHATSUPDOCKER_USERNAME"
+    value = var.HPI_WHATSUPDOCKER_USERNAME
+  }
+  env {
+    name  = "HPI_WHATSUPDOCKER_PASSWORD"
+    value = var.HPI_WHATSUPDOCKER_PASSWORD
   }
   env {
     name  = "SHEPHERD_REGISTRY_USERNAME"
@@ -65,6 +104,6 @@ resource "portainer_stack" "update" {
   }
 
   lifecycle {
-    ignore_changes = [env, repository_reference_name]
+    ignore_changes = [repository_reference_name]
   }
 }

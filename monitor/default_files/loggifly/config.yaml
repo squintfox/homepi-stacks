@@ -1,0 +1,12 @@
+# Minimal LoggiFly config. Edit and save to /config/config.yaml
+#
+# For all available options see:
+# https://clemcer.github.io/loggifly/guide/config/
+
+containers:
+  rules:
+    - container_name: "*"
+
+swarm:
+  rules:
+    - service_name: "*"

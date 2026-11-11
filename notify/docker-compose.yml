@@ -1,0 +1,116 @@
+services:
+  ntfy:
+    image: binwiederhier/ntfy:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
+    user: "${HPI_APP_UID}:${HPI_APP_GID}"
+    command: ["serve"]
+    environment:
+      NTFY_LISTEN_HTTP: ":8080"
+      NTFY_BASE_URL: https://notify${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
+      NTFY_BEHIND_PROXY: "true"
+      # NTFY_AUTH_DEFAULT_ACCESS: deny-all
+      # NTFY_ENABLE_LOGIN: "true"
+      # HPI_NTFY_ADMIN_PASSWORD_HASH is a bcrypt hash for the admin user password
+      # python3 -c "import bcrypt; print(bcrypt.hashpw(b'MYPASSWORD', bcrypt.gensalt(10)).decode())"
+      # NTFY_AUTH_USERS: "admin:${HPI_NTFY_ADMIN_PASSWORD_HASH}:admin,mailrise:${HPI_NTFY_ADMIN_PASSWORD_HASH}:user" # TODO: this needs to be a real hash
+      # NTFY_AUTH_ACCESS: "mailrise:mailrise:wo"
+      # HPI_NTFY_MAILRISE_TOKEN is a valid access token, which must start with tk_ and be 32 characters long
+      # (including the prefix).  Numbers and lowercase letters only.
+      # You can generate random tokens using the ntfy token generate command.
+      # NTFY_AUTH_TOKENS: "mailrise:${HPI_NTFY_MAILRISE_TOKEN}"
+      NTFY_CACHE_FILE: /var/lib/ntfy/cache.db
+      # NTFY_AUTH_FILE: /var/lib/ntfy/auth.db
+      NTFY_ATTACHMENT_CACHE_DIR: /var/lib/ntfy/attachments
+      NTFY_UPSTREAM_BASE_URL: https://ntfy.sh
+      # NTFY_WEB_PUSH_PUBLIC_KEY: <public_key>
+      # NTFY_WEB_PUSH_PRIVATE_KEY: <private_key>
+      NTFY_WEB_PUSH_FILE: /var/lib/ntfy/webpush.db
+      # NTFY_WEB_PUSH_EMAIL_ADDRESS: <email>
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/ntfy:/var/lib/ntfy
+    networks:
+      - webproxy-backend
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --tries=1 http://localhost:8080/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1",
+        ]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    init: true
+    labels:
+      caddy: notify${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 8080}}"
+      caddy.tls.propagation_delay: 120s
+      caddy.tls.dns: desec
+      caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+    deploy:
+      labels:
+        homepage.group: Monitoring
+        homepage.name: Notifications
+        homepage.icon: sh-ntfy
+        homepage.href: https://notify${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+  mailrise:
+    image: yoryan/mailrise:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
+    user: "${HPI_APP_UID}:${HPI_APP_GID}"
+    environment:
+      HOME: /home/mailrise
+      MAILRISE_NTFY_URL: ntfys://notify${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/mailrise
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/mailrise/mailrise.conf:/etc/mailrise.conf:ro
+    ports:
+      - "8025:8025"
+    networks:
+      - webproxy-backend
+
+  mailrise-auth:
+    image: yoryan/mailrise:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
+    user: "${HPI_APP_UID}:${HPI_APP_GID}"
+    environment:
+      HOME: /home/mailrise
+      MAILRISE_NTFY_URL: ntfys://notify${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/mailrise
+    volumes:
+      - ${HPI_LOCAL_DATA_PATH}/mailrise/mailrise-auth.conf:/etc/mailrise.conf:ro
+    ports:
+      - "8026:8026"
+    networks:
+      - webproxy-backend
+
+  # apprise:
+  #   image: caronc/apprise:latest
+  #   user: "${HPI_APP_UID}:${HPI_APP_GID}"
+  #   environment:
+  #     APPRISE_STATEFUL_MODE: simple
+  #     APPRISE_WORKER_COUNT: "1"
+  #     APPRISE_DEFAULT_FORMAT: text
+  #   volumes:
+  #     - ${HPI_LOCAL_DATA_PATH}/apprise/config:/config
+  #     - ${HPI_LOCAL_DATA_PATH}/apprise/attach:/attach
+  #   networks:
+  #     - webproxy-backend
+  #   labels:
+  #     caddy: apprise${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
+  #     caddy.reverse_proxy: "{{upstreams 8000}}"
+  #     caddy.tls.propagation_delay: 120s
+  #     caddy.tls.dns: desec
+  #     caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+  #   deploy:
+  #     labels:
+  #       homepage.group: Notifications
+  #       homepage.name: Apprise
+  #       homepage.icon: sh-apprise
+  #       homepage.href: https://apprise${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+
+networks:
+  webproxy-backend:
+    external: true
+

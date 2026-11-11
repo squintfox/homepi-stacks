@@ -28,7 +28,7 @@ terraform {
 }
 
 provider "portainer" {
-  endpoint = "https://manage.${var.HPI_DNS_DOMAIN}:${var.HPI_HTTPS_PORT}"
+  endpoint = "https://manage${var.HPI_HOSTNAME_SUFFIX}.${var.HPI_DNS_DOMAIN}:${var.HPI_HTTPS_PORT}"
   api_key  = var.HPI_PORTAINER_TOKEN
 }
 
@@ -61,8 +61,16 @@ resource "portainer_stack" "tools" {
     value = var.HPI_DNS_DOMAIN
   }
   env {
+    name  = "HPI_HOSTNAME_SUFFIX"
+    value = var.HPI_HOSTNAME_SUFFIX
+  }
+  env {
     name  = "HPI_HTTPS_PORT"
     value = var.HPI_HTTPS_PORT
+  }
+  env {
+    name  = "HPI_LOCAL_IP_ADDRESS"
+    value = var.HPI_LOCAL_IP_ADDRESS
   }
 
   # /required

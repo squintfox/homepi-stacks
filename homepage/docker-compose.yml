@@ -1,6 +1,8 @@
 services:
   homepage:
     image: gethomepage/homepage:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     # ports:
     #   - 3000:3000
     volumes:
@@ -9,11 +11,11 @@ services:
       PUID: ${HPI_APP_UID}
       PGID: ${HPI_APP_GID}
       # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
-      HOMEPAGE_ALLOWED_HOSTS: homepage.${HPI_DNS_DOMAIN},homepage.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT} 
+      HOMEPAGE_ALLOWED_HOSTS: homepage${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN},homepage${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}
     networks:
       - webproxy-backend
     labels:
-      caddy: homepage.${HPI_DNS_DOMAIN}
+      caddy: homepage${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 3000}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
@@ -23,3 +25,4 @@ networks:
   webproxy-backend:
     external: true
     name: webproxy-backend
+

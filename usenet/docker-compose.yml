@@ -3,6 +3,8 @@
 services:
   gluetun:  # VPN Client
     image: qmcgaw/gluetun:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -22,18 +24,20 @@ services:
         aliases:
           - sabnzbd
     labels:
-      caddy: content-usenet.${HPI_DNS_DOMAIN}
+      caddy: content-usenet${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 8080}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
-      homepage.group: Content
+      homepage.group: Media & Entertainment
       homepage.name: Usenet
       homepage.icon: sh-sabnzbd
-      homepage.href: https://content-usenet.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+      homepage.href: https://content-usenet${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   sabnzbd:  # Usenet Client
     image: lscr.io/linuxserver/sabnzbd:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     restart: unless-stopped
     environment:
       - PUID=${HPI_APP_UID}

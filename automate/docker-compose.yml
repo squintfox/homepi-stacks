@@ -1,6 +1,8 @@
 services:
   hass-db:
     image: postgres:18
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       POSTGRES_DB: ${HOMEASSISTANT_DB_DATABASE}
       # VAULT
@@ -13,6 +15,8 @@ services:
       
   homeassistant:
     image: homeassistant/home-assistant:stable
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/homeassistant/config:/config
       - /etc/localtime:/etc/localtime:ro
@@ -27,20 +31,22 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: automate.${HPI_DNS_DOMAIN}
+      caddy: automate${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 8123}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
     deploy:
       labels:
-        homepage.group: Home  
+        homepage.group: Home & Planning
         homepage.name: Automate  
         homepage.icon: sh-home-assistant
-        homepage.href: https://automate.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        homepage.href: https://automate${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   mosquitto:
     image: eclipse-mosquitto
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     volumes:
       - ${HPI_LOCAL_DATA_PATH}/homeassistant/mosquitto/config:/mosquitto/config:rw
       - ${HPI_LOCAL_DATA_PATH}/homeassistant/mosquitto/data:/mosquitto/data:rw
@@ -54,3 +60,4 @@ services:
 networks:
   webproxy-backend:
     external: true
+

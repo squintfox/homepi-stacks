@@ -2,6 +2,8 @@ services:
   # for DNS-over-TLS
   proxy:
     image: nginx:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     ports:
       - ${DNS_TLS_PORT:-853}:853/tcp
     environment:
@@ -55,13 +57,16 @@ services:
       EOF
       exec nginx -g "daemon off;"
       '
+    labels:
+      loggifly.monitor: "true"
+      loggifly.ignore_keywords: "Connection reset by peer"
 
   acme-desec:
     image: neilpang/acme.sh:latest
     environment:
       - DEDYN_TOKEN=${HPI_DESEC_TOKEN}
       - LE_EMAIL=${HPI_PRIMARY_EMAIL}
-      - LE_DOMAIN=dns.${HPI_DNS_DOMAIN}
+      - LE_DOMAIN=dns${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       - LE_DNS_SLEEP=120
       - DOCKER_HOST=tcp://dockerproxy:2375
     networks:
@@ -92,3 +97,4 @@ services:
 networks:
   webproxy-backend:
     external: true
+

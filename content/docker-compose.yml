@@ -1,6 +1,8 @@
 services:
   radarr: # Movies
     image: lscr.io/linuxserver/radarr:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       - PUID=${HPI_APP_UID}
       - PGID=${HPI_APP_GID}
@@ -9,7 +11,7 @@ services:
       - RADARR__APP__LAUNCHBROWSER=false
       - RADARR__AUTH__APIKEY=${HPI_RADARR_APIKEY}
       - RADARR__AUTH__ENABLED=true
-      - RADARR__AUTH__METHOD=Forms
+      - RADARR__AUTH__METHOD=forms
       - RADARR__AUTH__REQUIRED=Enabled
       - RADARR__LOG__LEVEL=info
       - RADARR__LOG__ANALYTICSENABLED=false
@@ -20,7 +22,7 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: content-movies.${HPI_DNS_DOMAIN}
+      caddy: content-movies${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 7878}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
@@ -29,13 +31,15 @@ services:
     #   - "7878:7878"
     deploy:
       labels:
-        - homepage.group=Content
+        - homepage.group=Media & Entertainment
         - homepage.name=Movies
         - homepage.icon=sh-radarr
-        - homepage.href=https://content-movies.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        - homepage.href=https://content-movies${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   sonarr: # TV
     image: lscr.io/linuxserver/sonarr:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       - PUID=${HPI_APP_UID}
       - PGID=${HPI_APP_GID}
@@ -43,8 +47,8 @@ services:
       - TZ=${HPI_TIME_ZONE}
       - SONARR__APP__LAUNCHBROWSER=false
       - SONARR__AUTH__APIKEY=${HPI_SONARR_APIKEY}
-      - SONARR__AUTH__ENABLED=true
-      - SONARR__AUTH__METHOD=Forms
+      # - SONARR__AUTH__ENABLED=true  # sonarr doesn't like this, forces it from forms to basic
+      - SONARR__AUTH__METHOD=forms
       - SONARR__AUTH__REQUIRED=Enabled
       - SONARR__LOG__LEVEL=info
       - SONARR__LOG__ANALYTICSENABLED=false
@@ -55,7 +59,7 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: content-tv.${HPI_DNS_DOMAIN}
+      caddy: content-tv${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 8989}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
@@ -64,13 +68,15 @@ services:
     #   - "8989:8989"
     deploy:
       labels:
-        - homepage.group=Content
+        - homepage.group=Media & Entertainment
         - homepage.name=TV
         - homepage.icon=sh-sonarr
-        - homepage.href=https://content-tv.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        - homepage.href=https://content-tv${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   lidarr: # Music
     image: lscr.io/linuxserver/lidarr:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       - PUID=${HPI_APP_UID}
       - PGID=${HPI_APP_GID}
@@ -79,7 +85,7 @@ services:
       - LIDARR__APP__LAUNCHBROWSER=false
       - LIDARR__AUTH__APIKEY=${HPI_LIDARR_APIKEY}
       - LIDARR__AUTH__ENABLED=true
-      - LIDARR__AUTH__METHOD=Forms
+      - LIDARR__AUTH__METHOD=forms
       - LIDARR__AUTH__REQUIRED=Enabled
       - LIDARR__LOG__LEVEL=info
       - LIDARR__LOG__ANALYTICSENABLED=false
@@ -90,7 +96,7 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: content-music.${HPI_DNS_DOMAIN}
+      caddy: content-music${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 8686}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
@@ -99,13 +105,15 @@ services:
     #   - "8686:8686"
     deploy:
       labels:
-        - homepage.group=Content
+        - homepage.group=Media & Entertainment
         - homepage.name=Music
         - homepage.icon=sh-lidarr
-        - homepage.href=https://content-music.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        - homepage.href=https://content-music${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   whisparr: # Adult Content
     image: ghcr.io/thespad/whisparr:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       - PUID=${HPI_APP_UID}
       - PGID=${HPI_APP_GID}
@@ -113,7 +121,7 @@ services:
       - WHISPARR__APP__LAUNCHBROWSER=false
       - WHISPARR__AUTH__APIKEY=${HPI_WHISPARR_APIKEY}
       - WHISPARR__AUTH__ENABLED=true
-      - WHISPARR__AUTH__METHOD=Forms
+      - WHISPARR__AUTH__METHOD=forms
       - WHISPARR__AUTH__REQUIRED=Enabled
       - WHISPARR__LOG__LEVEL=info
       - WHISPARR__LOG__ANALYTICSENABLED=false
@@ -124,7 +132,7 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: content-nsfw.${HPI_DNS_DOMAIN}
+      caddy: content-nsfw${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 6969}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
@@ -136,7 +144,7 @@ services:
     #     - homepage.group=Content
     #     - homepage.name=NSFW
     #     - homepage.icon=sh-whisparr
-    #     - homepage.href=https://content-nsfw.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+    #     - homepage.href=https://content-nsfw${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   # sportarr:  # Sports
   #   image: sportarr/sportarr:latest
@@ -179,6 +187,8 @@ services:
 
   bazarr: # Subtitles
     image: lscr.io/linuxserver/bazarr:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       - PUID=${HPI_APP_UID}
       - PGID=${HPI_APP_GID}
@@ -189,7 +199,7 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: content-subtitles.${HPI_DNS_DOMAIN}
+      caddy: content-subtitles${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 6767}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
@@ -198,13 +208,15 @@ services:
     #   - "6767:6767"
     deploy:
       labels:
-        - homepage.group=Content
+        - homepage.group=Media & Entertainment
         - homepage.name=Subtitles
         - homepage.icon=sh-bazarr
-        - homepage.href=https://content-subtitles.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        - homepage.href=https://content-subtitles${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   seerr: # Media Requests
     image: ghcr.io/seerr-team/seerr:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     init: true
     environment:
       # Seerr does not recommend using non-default UID/GID.
@@ -218,7 +230,7 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: content-requests.${HPI_DNS_DOMAIN}
+      caddy: content-requests${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 5055}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
@@ -227,13 +239,15 @@ services:
     #   - "5055:5055"
     deploy:
       labels:
-        - homepage.group=Content
+        - homepage.group=Media & Entertainment
         - homepage.name=Requests
         - homepage.icon=sh-seerr
-        - homepage.href=https://content-requests.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        - homepage.href=https://content-requests${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   prowlarr: # Indexers
     image: lscr.io/linuxserver/prowlarr:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       - PUID=${HPI_APP_UID}
       - PGID=${HPI_APP_GID}
@@ -242,7 +256,7 @@ services:
       - PROWLARR__APP__LAUNCHBROWSER=false
       - PROWLARR__AUTH__APIKEY=${HPI_PROWLARR_APIKEY}
       - PROWLARR__AUTH__ENABLED=true
-      - PROWLARR__AUTH__METHOD=Forms
+      - PROWLARR__AUTH__METHOD=forms
       - PROWLARR__AUTH__REQUIRED=Enabled
       - PROWLARR__LOG__LEVEL=info
       - PROWLARR__LOG__ANALYTICSENABLED=false
@@ -252,7 +266,7 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: content-indexer.${HPI_DNS_DOMAIN}
+      caddy: content-indexer${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 9696}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
@@ -261,13 +275,15 @@ services:
     #   - "9696:9696"
     deploy:
       labels:
-        - homepage.group=Content
+        - homepage.group=Media & Entertainment
         - homepage.name=Indexer
         - homepage.icon=sh-prowlarr
-        - homepage.href=https://content-indexer.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
+        - homepage.href=https://content-indexer${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}:${HPI_HTTPS_PORT}/
 
   flaresolverr: # Captcha Solver
     image: ghcr.io/flaresolverr/flaresolverr:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     environment:
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - LOG_HTML=${LOG_HTML:-false}
@@ -276,7 +292,7 @@ services:
     networks:
       - webproxy-backend
     labels:
-      caddy: content-solver.${HPI_DNS_DOMAIN}
+      caddy: content-solver${HPI_HOSTNAME_SUFFIX}.${HPI_DNS_DOMAIN}
       caddy.reverse_proxy: "{{upstreams 8191}}"
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec

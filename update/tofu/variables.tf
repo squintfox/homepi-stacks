@@ -6,6 +6,9 @@ variable "HPI_PORTAINER_TOKEN" {
 variable "HPI_DNS_DOMAIN" {
   type        = string
 }
+variable "HPI_HOSTNAME_SUFFIX" {
+  type        = string
+}
 variable "HPI_HTTPS_PORT" {
   type        = string
 }
@@ -19,11 +22,27 @@ variable "HPI_TFSTATE_PASSPHRASE" {
   type        = string
   sensitive   = true
 }
+variable "HPI_LOCAL_IP_ADDRESS" {
+  type        = string
+}
 
 # /required
-
+variable "HPI_DESEC_TOKEN" {
+  type        = string
+  sensitive   = true
+}
 variable "HPI_TIME_ZONE" {
   type        = string
+}
+variable "HPI_PRIMARY_EMAIL" {
+  type        = string
+}
+variable "HPI_WHATSUPDOCKER_USERNAME" {
+  type        = string
+}
+variable "HPI_WHATSUPDOCKER_PASSWORD" {
+  type        = string
+  sensitive   = true
 }
 variable "SHEPHERD_REGISTRY_USERNAME" {
   type        = string
