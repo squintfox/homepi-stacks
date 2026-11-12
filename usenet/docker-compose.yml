@@ -36,8 +36,6 @@ services:
 
   sabnzbd:  # Usenet Client
     image: lscr.io/linuxserver/sabnzbd:latest
-    dns:
-      - ${HPI_LOCAL_IP_ADDRESS}
     restart: unless-stopped
     environment:
       - PUID=${HPI_APP_UID}

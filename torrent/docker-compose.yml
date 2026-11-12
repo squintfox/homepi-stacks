@@ -3,6 +3,8 @@
 services:
   gluetun: # VPN Client
     image: qmcgaw/gluetun:latest
+    dns:
+      - ${HPI_LOCAL_IP_ADDRESS}
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -68,8 +70,6 @@ services:
 
   qbittorrent-port-update:
     image: technosam/qbittorrent-gluetun-port-update:latest
-    dns:
-      - ${HPI_LOCAL_IP_ADDRESS}
     restart: unless-stopped
     network_mode: service:gluetun
     environment:
@@ -83,8 +83,6 @@ services:
 
   qbittorrent-ui:
     image: ghcr.io/autobrr/qui:latest
-    dns:
-      - ${HPI_LOCAL_IP_ADDRESS}
     restart: unless-stopped
     environment:
       - PUID=${HPI_APP_UID}

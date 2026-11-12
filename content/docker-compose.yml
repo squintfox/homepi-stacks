@@ -27,6 +27,9 @@ services:
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      loggifly.monitor: "true"
+      loggifly.ntfy_topic: "hpi-low"
+      loggifly.ntfy_priority: "2"
     # ports:
     #   - "7878:7878"
     deploy:
@@ -64,6 +67,9 @@ services:
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      loggifly.monitor: "true"
+      loggifly.ntfy_topic: "hpi-low"
+      loggifly.ntfy_priority: "2"
     # ports:
     #   - "8989:8989"
     deploy:
@@ -101,6 +107,9 @@ services:
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      loggifly.monitor: "true"
+      loggifly.ntfy_topic: "hpi-low"
+      loggifly.ntfy_priority: "2"
     # ports:
     #   - "8686:8686"
     deploy:
@@ -137,6 +146,9 @@ services:
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      loggifly.monitor: "true"
+      loggifly.ntfy_topic: "hpi-low"
+      loggifly.ntfy_priority: "2"
     # ports:
     #   - "6969:6969"
     # deploy:
@@ -204,6 +216,9 @@ services:
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      loggifly.monitor: "true"
+      loggifly.ntfy_topic: "hpi-low"
+      loggifly.ntfy_priority: "2"
     # ports:
     #   - "6767:6767"
     deploy:
@@ -235,6 +250,9 @@ services:
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      loggifly.monitor: "true"
+      loggifly.ntfy_topic: "hpi-low"
+      loggifly.ntfy_priority: "2"
     # ports:
     #   - "5055:5055"
     deploy:
@@ -271,6 +289,9 @@ services:
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      loggifly.monitor: "true"
+      loggifly.ntfy_topic: "hpi-low"
+      loggifly.ntfy_priority: "2"
     # ports:
     #   - "9696:9696"
     deploy:
@@ -297,6 +318,9 @@ services:
       caddy.tls.propagation_delay: 120s
       caddy.tls.dns: desec
       caddy.tls.dns.token: ${HPI_DESEC_TOKEN}
+      loggifly.monitor: "true"
+      loggifly.ntfy_topic: "hpi-low"
+      loggifly.ntfy_priority: "2"
     # ports:
     #   - "8191:8191"
     # this doesn't have a UI
